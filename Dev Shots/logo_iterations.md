@@ -53,3 +53,11 @@ Here are the designs I generated!
 ## Iteration 13 (Neo-Brutalist, No Pan)
 
 ![Thirteenth attempt - flat web-ready neo-brutalist style, just the crust](/Users/Aaron/.gemini/antigravity/brain/fb90d3a7-734c-4845-8d92-986d653d97c0/artifacts/cloud_pie_logo_v13_neobrutalist_nopan_1775537289861.png)
+
+## Iteration 14 (Neo-Brutalist Pop-Art, Orange)
+
+![Fourteenth attempt - neon orange neo-brutalist pop-art style](/Users/Aaron/.gemini/antigravity/brain/fb90d3a7-734c-4845-8d92-986d653d97c0/artifacts/cloud_pie_logo_v14_orange_1775537570777.png)
+
+## Iteration 15 (Neo-Brutalist Pop-Art, Toxic Green)
+
+![Fifteenth attempt - toxic green neo-brutalist pop-art style](/Users/Aaron/.gemini/antigravity/brain/fb90d3a7-734c-4845-8d92-986d653d97c0/artifacts/cloud_pie_logo_v15_toxic_green_1775537582690.png)
