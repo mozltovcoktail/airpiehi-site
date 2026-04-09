@@ -235,10 +235,9 @@ body.spin-page {
 }
 
 @keyframes airFloat {
-  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-  30%  { opacity: 1; }
-  60%  { transform: translate(var(--air-x), -80px) rotate(var(--air-rot)) scale(0.9); opacity: 0.7; }
-  100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  60%  { transform: translate(var(--air-x), -160px) rotate(var(--air-rot)) scale(1); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
 }
 
 .hero-content h1 .letter.air-scatter {
