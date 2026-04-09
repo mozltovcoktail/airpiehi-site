@@ -116,8 +116,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const numCols = Math.ceil(cw / baseFontSize);
             cols = Array.from({ length: numCols }, () => {
-              const speedMultiplier = 0.1 + Math.random() * 0.9; // 0.1–1.0
-              const fontSizeVar = baseFontSize * (0.6 + Math.random() * 0.6); // 60–120% of base
+              // Bias toward slower speeds for larger sizes
+              const rand = Math.random();
+              let speedMultiplier, fontSizeVar;
+
+              if (rand < 0.3) {
+                // 30% chance: large & slow
+                fontSizeVar = baseFontSize * (0.9 + Math.random() * 0.3);
+                speedMultiplier = 0.05 + Math.random() * 0.2;
+              } else if (rand < 0.6) {
+                // 30% chance: small & fast
+                fontSizeVar = baseFontSize * (0.6 + Math.random() * 0.25);
+                speedMultiplier = 0.5 + Math.random() * 0.5;
+              } else {
+                // 40% chance: medium mixed
+                fontSizeVar = baseFontSize * (0.6 + Math.random() * 0.6);
+                speedMultiplier = 0.1 + Math.random() * 0.9;
+              }
+
               return {
                 y: Math.random() * ch,
                 speed: fontSizeVar * speedMultiplier,
@@ -145,10 +161,26 @@ document.addEventListener('DOMContentLoaded', () => {
               // Always reset immediately, but start at varied heights above canvas
               // so restarts are staggered — no dead zones, always active
               if (col.y > ch) {
-                col.y = -col.fontSize * (1 + Math.floor(Math.random() * 8));
-                const speedMultiplier = 0.1 + Math.random() * 0.9;
-                col.fontSize = baseFontSize * (0.6 + Math.random() * 0.6);
-                col.speed = col.fontSize * speedMultiplier;
+                const rand = Math.random();
+                let speedMultiplier, fontSizeVar;
+
+                if (rand < 0.3) {
+                  // 30% chance: large & slow
+                  fontSizeVar = baseFontSize * (0.9 + Math.random() * 0.3);
+                  speedMultiplier = 0.05 + Math.random() * 0.2;
+                } else if (rand < 0.6) {
+                  // 30% chance: small & fast
+                  fontSizeVar = baseFontSize * (0.6 + Math.random() * 0.25);
+                  speedMultiplier = 0.5 + Math.random() * 0.5;
+                } else {
+                  // 40% chance: medium mixed
+                  fontSizeVar = baseFontSize * (0.6 + Math.random() * 0.6);
+                  speedMultiplier = 0.1 + Math.random() * 0.9;
+                }
+
+                col.y = -fontSizeVar * (1 + Math.floor(Math.random() * 8));
+                col.fontSize = fontSizeVar;
+                col.speed = fontSizeVar * speedMultiplier;
                 col.brightness = 0.4 + Math.random() * 0.6;
               }
             }
