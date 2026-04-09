@@ -1,5 +1,8 @@
 import './style.css'
 
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
 document.addEventListener('DOMContentLoaded', () => {
   // Set current year in footer
   const yearElement = document.getElementById('year');
@@ -40,11 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
       letter.classList.add('boop');
       setTimeout(() => {
         letter.classList.remove('boop');
-        if (letter.matches(':hover')) {
-          // Snap directly to hover state — skip the origin frame
+        // :hover doesn't re-evaluate unless mouse moves — check manually
+        const rect = letter.getBoundingClientRect();
+        const isOver = mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom;
+        if (isOver) {
           letter.style.transition = 'none';
           letter.style.transform = 'translate(-4px, -6px) scale(1.1)';
-          letter.offsetHeight; // flush
+          letter.offsetHeight;
           letter.style.transition = '';
           letter.style.transform = '';
         }
