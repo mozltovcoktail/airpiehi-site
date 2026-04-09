@@ -62,10 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       logoClicks++;
       if (logoClicks >= 3) {
-        if (h1) {
-          h1.classList.add('spin-letters');
-          setTimeout(() => h1.classList.remove('spin-letters'), 600);
-        }
+        document.body.classList.add('spin-page');
+        setTimeout(() => document.body.classList.remove('spin-page'), 1200);
         logoClicks = 0;
       }
     });
