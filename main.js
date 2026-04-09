@@ -82,6 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('mouseleave', () => {
       leaveTimer = setTimeout(() => letter.classList.remove('letter-hover'), 40);
     });
+    // On touch devices, clear hover after boop finishes so it doesn't stick
+    letter.addEventListener('touchend', () => {
+      setTimeout(() => letter.classList.remove('letter-hover'), 450);
+    });
 
     letter.addEventListener('click', () => {
       // Juicy animation
@@ -315,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (code === 'A1RP1E') {
         codeResponse.style.opacity = '1';
         codeResponse.style.color = '#0f0';
-        codeResponse.innerHTML = 'Verifying...';
+        codeResponse.innerHTML = 'Authorizing...';
         codeInput.value = '';
         setTimeout(() => {
           triggerPennyConfetti();
@@ -486,28 +490,41 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function triggerHeartRain() {
-  const colors = ['#000000'];
-  const count = 40;
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+  document.body.appendChild(container);
+
+  const count = 'ontouchstart' in window ? 20 : 40;
+  const vh = window.innerHeight;
+
+  // Create all hearts at once — browser batches one layout pass.
+  // Each heart starts translated above the container (hidden by overflow:hidden)
+  // and uses animation delay for staggered entry.
   for (let i = 0; i < count; i++) {
-    setTimeout(() => {
-      const heart = document.createElement('span');
-      heart.textContent = '♥';
-      heart.style.cssText = `
-        position: fixed;
-        top: -2rem;
-        left: ${Math.random() * 100}vw;
-        font-size: ${1 + Math.random() * 2}rem;
-        color: ${colors[Math.floor(Math.random() * colors.length)]};
-        pointer-events: none;
-        z-index: 9999;
-        will-change: transform, opacity;
-        animation: heartFall ${1.5 + Math.random() * 1.5}s ease-in forwards;
-        transform: rotate(${(Math.random() - 0.5) * 40}deg);
-      `;
-      document.body.appendChild(heart);
-      setTimeout(() => heart.remove(), 3500);
-    }, i * 60);
+    const heart = document.createElement('span');
+    heart.textContent = '♥';
+    const size = 1 + Math.random() * 2;
+    const rot = (Math.random() - 0.5) * 40;
+    // Start well above the container top so overflow:hidden clips them before delay
+    const startY = -(40 + i * 3);
+    heart.style.cssText = `
+      position:absolute;
+      top:0;
+      left:${Math.random() * 95}%;
+      font-size:${size}rem;
+      color:#000;
+      transform:translateY(${startY}px) rotate(${rot}deg);
+    `;
+    container.appendChild(heart);
+
+    const duration = 1500 + Math.random() * 1500;
+    heart.animate([
+      { transform: `translateY(${startY}px) rotate(${rot}deg) scale(1)` },
+      { transform: `translateY(${vh + 40}px) rotate(${rot + 180}deg) scale(0.5)` }
+    ], { duration, delay: i * 60, easing: 'ease-in', fill: 'forwards' });
   }
+
+  setTimeout(() => container.remove(), 5000);
 }
 
 function triggerAirMode() {
@@ -613,52 +630,54 @@ function triggerPennyConfetti() {
 
   const colors = ['#c4a882', '#ffee00', '#a855f7', '#ff3b3b', '#ffb366', '#4db8ff', '#ffffff'];
 
-  // Start raining cards after a small delay
+  // Start raining cards after a small delay — batch-create for smooth animation
   setTimeout(() => {
-    for (let i = 0; i < 60; i++) {
-      setTimeout(() => {
-        const card = document.createElement('div');
-        card.style.position = 'absolute';
-        card.style.willChange = 'transform';
-        card.style.top = '-150px';
-        card.style.left = Math.random() * 95 + 'vw';
-        card.style.width = '80px';
-        card.style.height = '112px';
-        card.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        card.style.border = '4px solid #000';
-        card.style.borderRadius = '6px';
-        card.style.boxShadow = '4px 4px 0 #000';
-        card.style.display = 'flex';
-        card.style.alignItems = 'center';
-        card.style.justifyContent = 'center';
-        card.style.padding = '8px';
-        
-        const img = document.createElement('img');
-        img.src = logoSrc;
-        img.style.maxWidth = '100%';
-        img.style.maxHeight = '100%';
-        img.style.filter = 'drop-shadow(2px 2px 0px rgba(0,0,0,0.5))';
-        card.appendChild(img);
+    const confettiCount = 'ontouchstart' in window ? 30 : 60;
+    const vh = window.innerHeight;
 
-        container.appendChild(card);
+    for (let i = 0; i < confettiCount; i++) {
+      const card = document.createElement('div');
+      const startY = -(150 + Math.random() * 100);
+      card.style.cssText = `
+        position:absolute;
+        top:0;
+        left:${Math.random() * 95}%;
+        width:80px;
+        height:112px;
+        background:${colors[Math.floor(Math.random() * colors.length)]};
+        border:4px solid #000;
+        border-radius:6px;
+        box-shadow:4px 4px 0 #000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:8px;
+        transform:translateY(${startY}px);
+      `;
 
-        // Better physics: start slow, fall fast with cubic-bezier
-        const fallDuration = 1500 + Math.random() * 2000;
-        const startX = (Math.random() - 0.5) * 50; 
-        const endX = startX + (Math.random() - 0.5) * 200; // Drift sideways
-        const rotation = -45 + Math.random() * 90;
-        const endRotation = rotation + (-360 + Math.random() * 720);
-        
-        const animation = card.animate([
-          { transform: `translate(${startX}px, 0) rotate(${rotation}deg)` },
-          { transform: `translate(${endX}px, 120vh) rotate(${endRotation}deg)` }
-        ], {
-          duration: fallDuration,
-          easing: 'cubic-bezier(0.4, 0, 1, 1)' // Accelerates like gravity
-        });
+      const img = document.createElement('img');
+      img.src = logoSrc;
+      img.style.cssText = 'max-width:100%;max-height:100%;filter:drop-shadow(2px 2px 0px rgba(0,0,0,0.5))';
+      card.appendChild(img);
+      container.appendChild(card);
 
-        animation.onfinish = () => card.remove();
-      }, Math.random() * 3500);
+      const fallDuration = 1500 + Math.random() * 2000;
+      const startX = (Math.random() - 0.5) * 50;
+      const endX = startX + (Math.random() - 0.5) * 200;
+      const rotation = -45 + Math.random() * 90;
+      const endRotation = rotation + (-360 + Math.random() * 720);
+
+      const anim = card.animate([
+        { transform: `translate(${startX}px, ${startY}px) rotate(${rotation}deg)` },
+        { transform: `translate(${endX}px, ${vh + 150}px) rotate(${endRotation}deg)` }
+      ], {
+        duration: fallDuration,
+        delay: Math.random() * 3500,
+        easing: 'cubic-bezier(0.4, 0, 1, 1)',
+        fill: 'forwards'
+      });
+
+      anim.onfinish = () => card.remove();
     }
   }, 1000);
 
