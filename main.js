@@ -56,8 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const logo = document.querySelector('.floating-logo-container');
   let logoClicks = 0;
   let floatResumeTimer = null;
+  let leanInTimer = null;
   if (logo) {
     logo.addEventListener('click', () => {
+      // Cancel any pending lean-in
+      if (leanInTimer) clearTimeout(leanInTimer);
+      logo.classList.remove('lean-in');
+
       // Pause the float, resume after 2.5s
       logo.classList.add('float-paused');
       if (floatResumeTimer) clearTimeout(floatResumeTimer);
@@ -71,6 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         logo.classList.add('spin-boop');
         setTimeout(() => logo.classList.remove('spin-boop'), 600);
+
+        // After first click, lean in if not clicked again within 1.8s
+        if (logoClicks === 1) {
+          leanInTimer = setTimeout(() => {
+            logo.classList.add('lean-in');
+          }, 1800);
+        }
       }
     });
   }
