@@ -242,9 +242,9 @@ body.spin-page {
 }
 
 @keyframes boop {
-  0% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.4) translateY(-10px) rotate(10deg); }
-  100% { transform: scale(1) translateY(0) rotate(0deg); }
+  0%   { transform: scale(1) translateY(0); text-shadow: 4px 4px 0px #000; }
+  50%  { transform: scale(1.4) translateY(-10px) rotate(10deg); text-shadow: 6px 18px 6px rgba(0,0,0,0.3); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); text-shadow: 4px 4px 0px #000; }
 }
 
 .hero-content h1 .letter.boop {
