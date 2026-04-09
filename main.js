@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       logoClicks++;
       if (logoClicks >= 3) {
         document.body.classList.add('spin-page');
-        setTimeout(() => document.body.classList.remove('spin-page'), 1200);
+        setTimeout(() => document.body.classList.remove('spin-page'), 1400);
         logoClicks = 0;
       } else {
         logo.classList.add('spin-boop');
