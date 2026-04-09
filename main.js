@@ -1,6 +1,93 @@
 import './style.css'
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Secret discovery tracker + eye state machine
+  const discoveredSecrets = new Set();
+  const secretEye = document.getElementById('secret-eye');
+  let eyeTimer1, eyeTimer2;
+
+  function setEyeState(state) {
+    if (!secretEye) return;
+    secretEye.classList.remove('restless', 'awake', 'excited');
+    if (state) secretEye.classList.add(state);
+  }
+
+  function eyeToSleep() {
+    clearTimeout(eyeTimer1);
+    clearTimeout(eyeTimer2);
+    // awake → restless → sleep
+    setEyeState('restless');
+    eyeTimer1 = setTimeout(() => setEyeState(null), 8000);
+  }
+
+  function tickerUpdate(pupil, newVal) {
+    const old = document.createElement('span');
+    const next = document.createElement('span');
+    old.textContent = pupil.textContent;
+    next.textContent = newVal;
+    const shared = 'display:block;line-height:26px;text-align:center;';
+    old.style.cssText = shared;
+    next.style.cssText = shared;
+    pupil.textContent = '';
+    pupil.appendChild(old);
+    pupil.appendChild(next);
+    old.animate([
+      { transform: 'translateY(0)' },
+      { transform: 'translateY(-26px)' }
+    ], { duration: 400, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', fill: 'forwards' });
+    next.animate([
+      { transform: 'translateY(0)' },
+      { transform: 'translateY(-26px)' }
+    ], { duration: 400, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', fill: 'forwards' }).onfinish = () => {
+      pupil.textContent = newVal;
+    };
+  }
+
+  function markSecret(name) {
+    if (discoveredSecrets.has(name)) return;
+    discoveredSecrets.add(name);
+    const pupil = document.querySelector('.eye-pupil');
+    if (pupil) tickerUpdate(pupil, discoveredSecrets.size);
+    // State 4: excited! (secret found)
+    clearTimeout(eyeTimer1);
+    clearTimeout(eyeTimer2);
+    setEyeState('excited');
+    eyeTimer1 = setTimeout(() => {
+      setEyeState('awake');
+      eyeTimer2 = setTimeout(() => eyeToSleep(), 4000);
+    }, 1200);
+  }
+
+  // Secret eye click → awake, first click discovers the eye itself
+  if (secretEye) {
+    secretEye.addEventListener('click', () => {
+      clearTimeout(eyeTimer1);
+      clearTimeout(eyeTimer2);
+      if (!discoveredSecrets.has('eye')) {
+        // First click — awake with ticker animation
+        setEyeState('awake');
+        setTimeout(() => markSecret('eye'), 300);
+      } else if (secretEye.classList.contains('awake') || secretEye.classList.contains('excited')) {
+        // Already awake — react with a quick blink
+        const pupil = document.querySelector('.eye-pupil');
+        if (pupil) {
+          pupil.animate([
+            { transform: 'translate(0, 0)' },
+            { transform: 'translate(4px, -2px)' },
+            { transform: 'translate(-3px, 1px)' },
+            { transform: 'translate(0, 0)' }
+          ], { duration: 300, easing: 'ease-in-out' });
+        }
+        // Quick blink
+        setEyeState(null);
+        setTimeout(() => setEyeState('awake'), 150);
+      } else {
+        setEyeState('awake');
+      }
+      eyeTimer1 = setTimeout(() => eyeToSleep(), 5000);
+    });
+  }
+
   // Set current year in footer
   const yearElement = document.getElementById('year');
   if (yearElement) {
@@ -30,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           footerHeart.style.transform = '';
           triggerHeartRain();
+          markSecret('hearts');
         }, 200);
       }
     });
@@ -99,12 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // Check if they spelled 'pie'
       if (clickHistory.slice(-3).join('') === 'pie') {
         triggerSecretMode();
+        markSecret('pie');
         clickHistory = [];
       }
 
       // Check if they spelled 'air'
       if (clickHistory.slice(-3).join('') === 'air') {
         triggerAirMode();
+        markSecret('air');
         clickHistory = [];
       }
     });
@@ -143,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logo.classList.remove('boop-tilt-1', 'boop-tilt-2');
         document.body.classList.add('spin-page');
         setTimeout(() => document.body.classList.remove('spin-page'), 1400);
+        markSecret('spin');
         logoClicks = 0;
       } else {
         logo.classList.remove('boop-tilt-1', 'boop-tilt-2');
@@ -323,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         codeInput.value = '';
         setTimeout(() => {
           triggerPennyConfetti();
+          markSecret('code');
           codeResponse.style.opacity = '0';
         }, 1500);
       } else {
@@ -347,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function flipSite() {
     isUpsideDown = true;
+    markSecret('flip');
     document.body.classList.add('upside-down');
     const ohNoWrapper = document.getElementById('oh-no-wrapper');
     if (ohNoWrapper) ohNoWrapper.style.display = 'block';
