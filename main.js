@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetLogoState() {
     onCooldown = false;
     logoClicks = 0;
-    logo.classList.remove('lean-in', 'float-paused');
+    logo.classList.remove('lean-in', 'float-paused', 'boop-tilt-1', 'boop-tilt-2');
+    logo.classList.add('tilt-reset');
+    setTimeout(() => logo.classList.remove('tilt-reset'), 500);
   }
 
   if (logo) {
@@ -81,19 +83,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
       logoClicks++;
       if (logoClicks >= 3) {
+        logo.classList.remove('boop-tilt-1', 'boop-tilt-2');
         document.body.classList.add('spin-page');
         setTimeout(() => document.body.classList.remove('spin-page'), 1400);
         logoClicks = 0;
       } else {
+        logo.classList.remove('boop-tilt-1', 'boop-tilt-2');
         logo.classList.add('spin-boop');
-        setTimeout(() => logo.classList.remove('spin-boop'), 600);
+        setTimeout(() => {
+          logo.classList.remove('spin-boop');
+          logo.classList.add(logoClicks === 1 ? 'boop-tilt-1' : 'boop-tilt-2');
+        }, 600);
 
         // After first click, lean in if not clicked again within 1.8s, then cooldown
         if (logoClicks === 1) {
           leanInTimer = setTimeout(() => {
+            logo.classList.remove('boop-tilt-1');
             logo.classList.add('lean-in');
             onCooldown = true;
-            // Remove lean-in class when animation finishes (1s), then cooldown 1.5s more
             setTimeout(() => logo.classList.remove('lean-in'), 1000);
             cooldownTimer = setTimeout(resetLogoState, 2500);
           }, 1800);
