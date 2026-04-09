@@ -89,39 +89,76 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Initialize Matrix
         const canvas = document.getElementById('matrix-canvas');
-        if (canvas && !canvas.dataset.matrixStarted) {
-          canvas.dataset.matrixStarted = 'true';
+        if (canvas) {
+          if (window.matrixInterval) clearInterval(window.matrixInterval);
+          if (window.matrixObserver) window.matrixObserver.disconnect();
+          if (canvas.matrixInterval) clearInterval(canvas.matrixInterval);
+          if (canvas.matrixObserver) canvas.matrixObserver.disconnect();
+
           const ctx = canvas.getContext('2d');
-          canvas.width = canvas.offsetWidth;
-          canvas.height = canvas.offsetHeight;
-          
-          const letters = ['🥧', 'P', 'I', 'E', '@', '#', '0', '1'];
-          const fontSize = 32;
-          const columns = Math.ceil(canvas.width / fontSize);
-          const drops = [];
-          for(let x = 0; x < columns; x++) drops[x] = 1; 
-          
+          const letters = ['A', '1', 'R', 'P', 'I', 'E'];
+          const fontSize = 22;
+          let cols = [], cw = 0, ch = 0;
+
+          function init() {
+            cw = canvas.offsetWidth;
+            ch = canvas.offsetHeight;
+            if (cw === 0 || ch <= 0) return false;
+
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(cw * dpr);
+            canvas.height = Math.floor(ch * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, cw, ch);
+
+            const numCols = Math.ceil(cw / fontSize);
+            // Stagger y positions randomly across full canvas height so columns
+            // are always at different phases — no synchronized bright band
+            cols = Array.from({ length: numCols }, () => ({
+              y: Math.random() * ch,
+              speed: fontSize * (0.3 + Math.random() * 0.8),
+            }));
+            return true;
+          }
+
           function draw() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#0f0';
-            ctx.font = 'bold ' + fontSize + 'px monospace';
-            ctx.textAlign = 'center';
-            for(let i = 0; i < drops.length; i++) {
-              const text = letters[Math.floor(Math.random() * letters.length)];
-              ctx.fillText(text, i * fontSize + (fontSize/2), drops[i] * fontSize);
-              if(drops[i] * fontSize > canvas.height && Math.random() > 0.95) drops[i] = 0;
-              drops[i]++;
+            if (!cw) return;
+            // Slow fade produces the trailing glow naturally
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.font = `bold ${fontSize}px monospace`;
+
+            for (let i = 0; i < cols.length; i++) {
+              const col = cols[i];
+              // Bright head only — fade overlay handles the trail
+              ctx.fillStyle = '#9f9';
+              ctx.fillText(letters[Math.floor(Math.random() * letters.length)], i * fontSize + 2, col.y);
+
+              col.y += col.speed;
+
+              // Always reset immediately, but start at varied heights above canvas
+              // so restarts are staggered — no dead zones, always active
+              if (col.y > ch) {
+                col.y = -fontSize * (1 + Math.floor(Math.random() * 8));
+                col.speed = fontSize * (0.4 + Math.random() * 0.7);
+              }
             }
           }
-          setInterval(draw, 120);
-          
-          window.addEventListener('resize', () => {
-            if (canvas.offsetWidth && canvas.offsetHeight) {
-              canvas.width = canvas.offsetWidth;
-              canvas.height = canvas.offsetHeight;
+
+          let started = false;
+          const observer = new ResizeObserver(() => {
+            if (init() && !started) {
+              started = true;
+              window.matrixInterval = setInterval(draw, 50);
+              canvas.matrixInterval = window.matrixInterval;
             }
           });
+          observer.observe(canvas.parentElement);
+          window.matrixObserver = observer;
+          canvas.matrixObserver = observer;
         }
       } else {
         secretText.style.display = 'none';
@@ -146,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       codeSubmit.classList.add('boop');
       setTimeout(() => codeSubmit.classList.remove('boop'), 200);
 
-      if (code === 'CARDVAULT' || code === 'PENNY' || code === 'PIE') {
+      if (code === 'A1RP1E') {
         codeResponse.style.opacity = '1';
         codeResponse.style.color = '#0f0';
         codeResponse.innerHTML = 'VERIFIED. REDIRECTING...';

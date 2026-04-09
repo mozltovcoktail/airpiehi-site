@@ -72,16 +72,15 @@
                  <h3>[REDACTED]</h3>
                  <div style="min-height: 190px; position: relative;">
                    <p id="top-secret-desc">Our next pie is currently in the oven. It's classified, but will likely be quite good and important for a very select group of people.</p>
-                   <div id="classified-secret" style="display: none; background: #000; color: #0f0; padding: 1rem; font-family: monospace; border-radius: var(--border-radius-sm); border: 2px solid #0f0; font-weight: bold; position: absolute; inset: 0; overflow: hidden; height: 100%; box-sizing: border-box;">
-                     <canvas id="matrix-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.5;"></canvas>
-                     <div style="position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000;">
-                       <p style="margin: 0;">[SYSTEM DECRYPTED]<br>PROJECT: PENNY.<br>STATUS: IMMINENT.</p>
-                       <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #0f0; display: flex; align-items: center; gap: 0.5rem;">
+                   <div id="classified-secret" style="display: none; background: #000; color: #0f0; padding: 1rem 0; font-family: monospace; border-radius: var(--border-radius-sm); border: 2px solid #0f0; font-weight: bold; position: absolute; inset: 0; overflow: hidden; height: 100%; box-sizing: border-box;">
+                     <canvas id="matrix-canvas" style="position: absolute; top: 0; left: 0; right: 0; bottom: 80px; width: 100%; height: calc(100% - 80px); z-index: 0;"></canvas>
+                     <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 1; height: 80px; padding: 0 1rem; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 0.5rem;">
+                       <div style="background: #000; border-top: 1px dashed #0f0; display: flex; align-items: center; gap: 0.5rem;">
                          <span>></span>
-                         <input type="text" id="secret-code-input" placeholder="ENTER ACCESS CODE" style="flex: 1; background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 1rem; outline: none; min-width: 0;" autocomplete="off" spellcheck="false" />
-                         <button id="secret-code-submit" style="background: transparent; border: 1px solid #0f0; color: #0f0; padding: 0.25rem 0.5rem; font-family: monospace; cursor: pointer; font-weight: bold; font-size: 0.9rem;">SUBMIT</button>
+                         <input type="text" id="secret-code-input" placeholder="ENTER ACCESS CODE" style="flex: 1; background: #000; border: none; color: #0f0; font-family: monospace; font-size: 1rem; outline: none; min-width: 0;" autocomplete="off" spellcheck="false" />
+                         <button id="secret-code-submit" style="background: #000; border: 1px solid #0f0; color: #0f0; padding: 0.25rem 0.5rem; font-family: monospace; cursor: pointer; font-weight: bold; font-size: 0.9rem;">SUBMIT</button>
                        </div>
-                       <p id="secret-code-response" style="margin-top: 0.5rem; margin-bottom: 0; color: #f00; font-size: 0.9rem; opacity: 0; transition: opacity 0.2s;">.</p>
+                       <p id="secret-code-response" style="background: #000; margin-top: 0.5rem; margin-bottom: 0; color: #f00; font-size: 0.9rem; opacity: 0; transition: opacity 0.2s;">.</p>
                      </div>
                    </div>
                  </div>
@@ -95,12 +94,12 @@
 
         <section class="coming-soon">
           <h2>More Pies In The Oven</h2>
-          <p>We're secretly crafting our next big thing. Stay tuned.</p>
+          <p>We're always cookin' somethin' up</p>
         </section>
       </main>
 
       <footer>
-        <p>&copy; <span id="year"></span> Air Pie LLC. Baked with ♥ in the clouds.</p>
+        <p>&copy; <span id="year"></span> Air Pie LLC. &nbsp;&nbsp;&nbsp;&nbsp; Baked with ♥ in the clouds.</p>
       </footer>
     </div>
     
