@@ -433,18 +433,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function triggerSecretMode() {
   document.body.style.animation = "rainbowBg 5s infinite";
-  
+
+  const logo = document.querySelector('.floating-logo-container');
+  const tagline = document.querySelector('.hero-content p');
+  const sectionTitle = document.querySelector('.section-title');
+
+  if (logo) logo.classList.add('logo-party');
+  if (tagline) tagline.classList.add('hero-party');
+  if (sectionTitle) setTimeout(() => sectionTitle.classList.add('hero-party'), 100);
+
   const cards = document.querySelectorAll('.app-card');
   cards.forEach((card, i) => {
-    setTimeout(() => {
-      card.classList.add('party-mode');
-    }, i * 150);
+    setTimeout(() => card.classList.add('party-mode'), i * 150);
   });
-  
+
   // Turn it off after 8 seconds
   setTimeout(() => {
-     cards.forEach(card => card.classList.remove('party-mode'));
-     document.body.style.animation = "";
+    cards.forEach(card => card.classList.remove('party-mode'));
+    if (logo) logo.classList.remove('logo-party');
+    if (tagline) tagline.classList.remove('hero-party');
+    if (sectionTitle) sectionTitle.classList.remove('hero-party');
+    document.body.style.animation = "";
   }, 8000);
 }
 
