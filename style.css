@@ -190,18 +190,21 @@ main {
 
 
 @keyframes fullPageSpin {
-  0%   { transform: rotate(0deg) scale(1); }
-  30%  { transform: rotate(120deg) scale(0.92); }
-  70%  { transform: rotate(280deg) scale(0.95); }
-  88%  { transform: rotate(362deg) scale(1); }
-  94%  { transform: rotate(358.5deg) scale(1); }
-  97%  { transform: rotate(360.5deg) scale(1); }
-  100% { transform: rotate(360deg) scale(1); }
+  0%   { transform: rotate(0deg) scale(1); filter: blur(0px); }
+  15%  { filter: blur(2px); }
+  30%  { transform: rotate(120deg) scale(0.92); filter: blur(4px); }
+  50%  { filter: blur(3px); }
+  70%  { transform: rotate(280deg) scale(0.95); filter: blur(1.5px); }
+  88%  { transform: rotate(362deg) scale(1); filter: blur(0px); }
+  94%  { transform: rotate(358.5deg) scale(1); filter: blur(0px); }
+  97%  { transform: rotate(360.5deg) scale(1); filter: blur(0px); }
+  100% { transform: rotate(360deg) scale(1); filter: blur(0px); }
 }
 
 body.spin-page {
   animation: fullPageSpin 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   transform-origin: center center;
+  will-change: transform, filter;
 }
 
 /* Secret Modes */
