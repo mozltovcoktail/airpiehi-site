@@ -57,8 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let logoClicks = 0;
   let floatResumeTimer = null;
   let leanInTimer = null;
+  let cooldownTimer = null;
+  let onCooldown = false;
+
+  function resetLogoState() {
+    onCooldown = false;
+    logoClicks = 0;
+    logo.classList.remove('lean-in', 'float-paused');
+  }
+
   if (logo) {
     logo.addEventListener('click', () => {
+      if (onCooldown) return;
+
       // Cancel any pending lean-in
       if (leanInTimer) clearTimeout(leanInTimer);
       logo.classList.remove('lean-in');
@@ -77,10 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
         logo.classList.add('spin-boop');
         setTimeout(() => logo.classList.remove('spin-boop'), 600);
 
-        // After first click, lean in if not clicked again within 1.8s
+        // After first click, lean in if not clicked again within 1.8s, then cooldown
         if (logoClicks === 1) {
           leanInTimer = setTimeout(() => {
             logo.classList.add('lean-in');
+            onCooldown = true;
+            // Remove lean-in class when animation finishes (1s), then cooldown 1.5s more
+            setTimeout(() => logo.classList.remove('lean-in'), 1000);
+            cooldownTimer = setTimeout(resetLogoState, 2500);
           }, 1800);
         }
       }
