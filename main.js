@@ -57,14 +57,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let logoClicks = 0;
   if (logo) {
     logo.addEventListener('click', () => {
-      logo.classList.add('spin-boop');
-      setTimeout(() => logo.classList.remove('spin-boop'), 600);
-
       logoClicks++;
       if (logoClicks >= 3) {
         document.body.classList.add('spin-page');
         setTimeout(() => document.body.classList.remove('spin-page'), 1200);
         logoClicks = 0;
+      } else {
+        logo.classList.add('spin-boop');
+        setTimeout(() => logo.classList.remove('spin-boop'), 600);
       }
     });
   }
