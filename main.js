@@ -462,10 +462,14 @@ function triggerSecretMode() {
   const logo = document.querySelector('.floating-logo-container');
   const tagline = document.querySelector('.hero-content p');
   const sectionTitle = document.querySelector('.section-title');
+  const comingSoon = document.querySelector('.coming-soon');
+  const heart = document.getElementById('footer-heart');
 
   if (logo) logo.classList.add('logo-party');
   if (tagline) tagline.classList.add('hero-party');
   if (sectionTitle) setTimeout(() => sectionTitle.classList.add('hero-party'), 100);
+  if (comingSoon) setTimeout(() => comingSoon.classList.add('hero-party'), 200);
+  if (heart) setTimeout(() => heart.classList.add('heart-party'), 300);
 
   const cards = document.querySelectorAll('.app-card');
   cards.forEach((card, i) => {
@@ -478,6 +482,8 @@ function triggerSecretMode() {
     if (logo) logo.classList.remove('logo-party');
     if (tagline) tagline.classList.remove('hero-party');
     if (sectionTitle) sectionTitle.classList.remove('hero-party');
+    if (comingSoon) comingSoon.classList.remove('hero-party');
+    if (heart) heart.classList.remove('heart-party');
     document.body.style.animation = "";
   }, 8000);
 }

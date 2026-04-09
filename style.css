@@ -156,8 +156,26 @@ main {
 }
 
 .hero-content p.hero-party,
-.section-title.hero-party {
+.section-title.hero-party,
+.coming-soon.hero-party {
   animation: heroDance 0.65s ease-in-out infinite !important;
+}
+
+@keyframes heartBeat {
+  0%   { transform: scale(1) rotate(0deg); }
+  20%  { transform: scale(1.5) rotate(-15deg); }
+  40%  { transform: scale(1.2) rotate(10deg); }
+  60%  { transform: scale(1.6) rotate(-10deg); }
+  80%  { transform: scale(1.1) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+#footer-heart {
+  display: inline-block;
+}
+
+#footer-heart.heart-party {
+  animation: heartBeat 0.5s ease-in-out infinite !important;
 }
 
 
