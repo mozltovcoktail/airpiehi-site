@@ -182,14 +182,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ohNoWrapper) ohNoWrapper.style.display = 'block';
   }
 
+  function unflipSite() {
+    isUpsideDown = false;
+    document.body.classList.remove('upside-down');
+    document.body.style.transform = '';
+    const ohNoWrapper = document.getElementById('oh-no-wrapper');
+    if (ohNoWrapper) ohNoWrapper.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const ohNoBtns = document.querySelectorAll('.oh-no-btn');
   ohNoBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      isUpsideDown = false;
-      document.body.classList.remove('upside-down');
-      document.getElementById('oh-no-wrapper').style.display = 'none';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    btn.addEventListener('click', () => unflipSite());
   });
 
   // Footer explicit click/touch and drag
@@ -254,19 +258,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const moveDrag = (y) => {
-      if (!isDraggingFooter || isUpsideDown) return;
-      const dragDelta = Math.max(0, footerDragStartY - y);
-      const pull = Math.pow(dragDelta, 0.7) * -1.2;
-      document.body.style.transform = `translateY(${pull}px)`;
-      showBelowFold(dragDelta);
+      if (!isDraggingFooter) return;
+      const dragDelta = footerDragStartY - y;
 
-      if (dragDelta > FLIP_THRESHOLD) {
-        isDraggingFooter = false;
-        footer.style.cursor = 'grab';
-        document.body.style.transform = '';
-        document.body.style.transition = '';
-        hideBelowFold();
-        flipSite();
+      if (!isUpsideDown) {
+        // Normal: pull footer up to flip
+        const pullUp = Math.max(0, dragDelta);
+        const pull = Math.pow(pullUp, 0.7) * -1.2;
+        document.body.style.transform = `translateY(${pull}px)`;
+        showBelowFold(pullUp);
+
+        if (pullUp > FLIP_THRESHOLD) {
+          isDraggingFooter = false;
+          footer.style.cursor = 'grab';
+          document.body.style.transform = '';
+          document.body.style.transition = '';
+          hideBelowFold();
+          flipSite();
+        }
+      } else {
+        // Upside down: pull footer down visually (currentY > startY, so dragDelta < 0)
+        const pullDown = Math.max(0, -dragDelta);
+        const pull = Math.pow(pullDown, 0.7) * 1.2;
+        // translateY before rotate = screen-space translation (moves element down visually)
+        document.body.style.transform = `translateY(${pull}px) rotate(180deg)`;
+
+        if (pullDown > FLIP_THRESHOLD) {
+          isDraggingFooter = false;
+          footer.style.cursor = 'grab';
+          document.body.style.transform = '';
+          document.body.style.transition = '';
+          unflipSite();
+        }
       }
     };
 
