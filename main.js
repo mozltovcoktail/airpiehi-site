@@ -390,7 +390,7 @@ function triggerPennyConfetti() {
 
   // Success message overlay
   const overlayText = document.createElement('div');
-  overlayText.innerHTML = 'PENNY AUTHORIZED';
+  overlayText.innerHTML = 'AUTHORIZATION AUTHORIZED';
   overlayText.style.fontFamily = 'monospace';
   overlayText.style.fontSize = 'clamp(2rem, 8vw, 6rem)';
   overlayText.style.fontWeight = 'bold';
