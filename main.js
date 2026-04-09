@@ -37,14 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
   letters.forEach((letter) => {
     // Track hover via class so it persists through boop animation
     // (CSS :hover won't re-evaluate without real mouse movement)
-    let leaveTimer;
-    letter.addEventListener('mouseenter', () => {
-      clearTimeout(leaveTimer);
-      letter.classList.add('letter-hover');
-    });
-    letter.addEventListener('mouseleave', () => {
-      leaveTimer = setTimeout(() => letter.classList.remove('letter-hover'), 40);
-    });
+    letter.addEventListener('mouseenter', () => letter.classList.add('letter-hover'));
+    letter.addEventListener('mouseleave', () => letter.classList.remove('letter-hover'));
 
     letter.addEventListener('click', () => {
       // Juicy animation
@@ -482,14 +476,25 @@ function triggerSecretMode() {
     setTimeout(() => card.classList.add('party-mode'), i * 150);
   });
 
-  // Turn it off after 8 seconds
+  // Turn it off after 8 seconds — settle gracefully from mid-animation position
   setTimeout(() => {
-    cards.forEach(card => card.classList.remove('party-mode'));
-    if (logo) logo.classList.remove('logo-party');
-    if (tagline) tagline.classList.remove('hero-party');
-    if (sectionTitle) sectionTitle.classList.remove('hero-party');
-    if (comingSoon) comingSoon.classList.remove('hero-party');
-    if (heart) heart.classList.remove('heart-party');
+    const settle = (el, partyClass) => {
+      if (!el) return;
+      const frozen = getComputedStyle(el).transform;
+      el.classList.remove(partyClass);
+      el.style.transform = frozen;
+      el.offsetHeight;
+      el.style.transition = 'transform 0.5s ease-out';
+      el.style.transform = '';
+      setTimeout(() => { el.style.transition = ''; }, 500);
+    };
+
+    settle(logo, 'logo-party');
+    settle(tagline, 'hero-party');
+    settle(sectionTitle, 'hero-party');
+    settle(comingSoon, 'hero-party');
+    settle(heart, 'heart-party');
+    cards.forEach(card => settle(card, 'party-mode'));
     document.body.style.animation = "";
   }, 8000);
 }
