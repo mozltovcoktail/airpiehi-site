@@ -228,6 +228,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
+  // Hide immediately if user scrolls back up
+  window.addEventListener('scroll', () => {
+    const scrollMaxY = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY < scrollMaxY - 2) {
+      wheelAccum = 0;
+      clearTimeout(wheelDecayTimer);
+      hideBelowFold();
+    }
+  }, { passive: true });
+
 
   if (footer) {
     footer.style.cursor = 'grab';
