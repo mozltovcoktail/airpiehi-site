@@ -154,8 +154,50 @@ main {
   color: #000000;
 }
 
-.app-card:nth-child(1) { background: var(--card-bg-1); }
-.app-card:nth-child(2) { background: var(--card-bg-2); }
+.app-card.neutralize { background: var(--card-bg-1); }
+
+.app-card.cardvault { background: var(--card-bg-3); }
+
+.app-card.colorbolt { 
+  background: 
+    linear-gradient(to right, #ffffcc 33.33%, #ffb366 33.33%, #ffb366 66.66%, #e63900 66.66%) 0 0 / 100% 33.34% no-repeat,
+    linear-gradient(to right, #ccffff 33.33%, #4db8ff 33.33%, #4db8ff 66.66%, #4d4dff 66.66%) 0 50% / 100% 33.33% no-repeat,
+    linear-gradient(to right, #000000 33.33%, #bfbfbf 33.33%, #bfbfbf 66.66%, #ffffff 66.66%) 0 100% / 100% 33.34% no-repeat;
+  padding: 0;
+}
+
+.app-card.colorbolt .inner-content {
+  margin: 1.5rem;
+  padding: 2rem;
+  background: #ffffff;
+  border: 4px solid #000;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 3rem);
+}
+
+.app-card.zeroviews {
+  background: #2a2a2a;
+  color: #fff;
+}
+.app-card.zeroviews h3, 
+.app-card.zeroviews p {
+  color: #fff;
+}
+.app-card.zeroviews h3 {
+  border-bottom-color: #fff;
+}
+.app-card.zeroviews .primary-link {
+  background: #111;
+  color: #fff;
+  border-color: #555;
+  box-shadow: 6px 6px 0px 0px #000;
+}
+.app-card.zeroviews .primary-link:hover {
+  background: #333;
+  box-shadow: 8px 8px 0px 0px #000;
+}
 
 .app-card:hover {
   transform: translate(-6px, -6px);
@@ -171,6 +213,20 @@ main {
   color: #000000;
   border-bottom: 4px solid #000;
   padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-icon {
+  width: 36px;
+  height: 36px;
+  stroke: #000;
+  stroke-width: 4px;
+}
+
+.app-card.zeroviews .app-icon {
+  stroke: #fff;
 }
 
 .app-card p {
@@ -178,6 +234,19 @@ main {
   font-size: 1.25rem;
   color: #000000;
   font-weight: 700;
+  margin-bottom: 2.5rem;
+  flex-grow: 1;
+}
+
+.app-card p:has(+ p.quote) {
+  margin-bottom: 0.5rem;
+  flex-grow: 0;
+}
+
+.app-card p.quote {
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-style: italic;
   margin-bottom: 2.5rem;
   flex-grow: 1;
 }
