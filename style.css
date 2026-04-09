@@ -109,18 +109,27 @@ main {
 }
 
 .floating-logo-container.boop-tilt-1 {
-  transform: rotate(5deg) !important;
-  transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+  animation: boop-tilt-1-anim 0.4s cubic-bezier(0.34, 1.4, 0.64, 1) forwards !important;
+}
+
+@keyframes boop-tilt-1-anim {
+  to { transform: rotate(5deg); }
 }
 
 .floating-logo-container.boop-tilt-2 {
-  transform: rotate(-4deg) !important;
-  transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+  animation: boop-tilt-2-anim 0.4s cubic-bezier(0.34, 1.4, 0.64, 1) forwards !important;
+}
+
+@keyframes boop-tilt-2-anim {
+  to { transform: rotate(-4deg); }
 }
 
 .floating-logo-container.tilt-reset {
-  transform: rotate(0deg) !important;
-  transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+  animation: tilt-reset-anim 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) forwards !important;
+}
+
+@keyframes tilt-reset-anim {
+  to { transform: rotate(0deg); }
 }
 
 @keyframes leanIn {
