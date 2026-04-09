@@ -30,9 +30,12 @@ body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
   position: relative;
   transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#app {
+  overflow-x: hidden;
 }
 
 body.upside-down {
