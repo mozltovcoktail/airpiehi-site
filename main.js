@@ -38,12 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('click', () => {
       // Juicy animation
       letter.classList.add('boop');
-      setTimeout(() => {
-        letter.style.transition = 'none';
-        letter.classList.remove('boop');
-        letter.offsetHeight; // force style flush so hover state applies now
-        letter.style.transition = '';
-      }, 400);
+      setTimeout(() => letter.classList.remove('boop'), 400);
 
       // Record letter click
       clickHistory.push(letter.textContent.toLowerCase());
