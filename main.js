@@ -7,6 +7,34 @@ document.addEventListener('DOMContentLoaded', () => {
     yearElement.textContent = new Date().getFullYear();
   }
 
+  // Secret: click the footer heart 5 times quickly → heart rain
+  const footerHeart = document.getElementById('footer-heart');
+  if (footerHeart) {
+    let heartClicks = 0;
+    let heartTimer;
+    footerHeart.style.cursor = 'pointer';
+    footerHeart.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    footerHeart.addEventListener('click', () => {
+      heartClicks++;
+      clearTimeout(heartTimer);
+      // Grow with each click
+      const scale = 1 + heartClicks * 0.15;
+      footerHeart.style.transform = `scale(${scale})`;
+      heartTimer = setTimeout(() => {
+        heartClicks = 0;
+        footerHeart.style.transform = '';
+      }, 800);
+      if (heartClicks >= 5) {
+        heartClicks = 0;
+        footerHeart.style.transform = 'scale(2.5)';
+        setTimeout(() => {
+          footerHeart.style.transform = '';
+          triggerHeartRain();
+        }, 200);
+      }
+    });
+  }
+
   // Contact button — email assembled in JS so it never appears in HTML source
   const contactBtn = document.getElementById('contact-btn');
   if (contactBtn) {
@@ -46,8 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
   letters.forEach((letter) => {
     // Track hover via class so it persists through boop animation
     // (CSS :hover won't re-evaluate without real mouse movement)
-    letter.addEventListener('mouseenter', () => letter.classList.add('letter-hover'));
-    letter.addEventListener('mouseleave', () => letter.classList.remove('letter-hover'));
+    let leaveTimer;
+    letter.addEventListener('mouseenter', () => {
+      clearTimeout(leaveTimer);
+      letter.classList.add('letter-hover');
+    });
+    letter.addEventListener('mouseleave', () => {
+      leaveTimer = setTimeout(() => letter.classList.remove('letter-hover'), 40);
+    });
 
     letter.addEventListener('click', () => {
       // Juicy animation
@@ -281,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (code === 'A1RP1E') {
         codeResponse.style.opacity = '1';
         codeResponse.style.color = '#0f0';
-        codeResponse.innerHTML = 'VERIFIED. REDIRECTING...';
+        codeResponse.innerHTML = 'Verifying...';
         codeInput.value = '';
         setTimeout(() => {
           triggerPennyConfetti();
@@ -451,6 +485,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+function triggerHeartRain() {
+  const colors = ['#000000'];
+  const count = 40;
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const heart = document.createElement('span');
+      heart.textContent = '♥';
+      heart.style.cssText = `
+        position: fixed;
+        top: -2rem;
+        left: ${Math.random() * 100}vw;
+        font-size: ${1 + Math.random() * 2}rem;
+        color: ${colors[Math.floor(Math.random() * colors.length)]};
+        pointer-events: none;
+        z-index: 9999;
+        will-change: transform, opacity;
+        animation: heartFall ${1.5 + Math.random() * 1.5}s ease-in forwards;
+        transform: rotate(${(Math.random() - 0.5) * 40}deg);
+      `;
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 3500);
+    }, i * 60);
+  }
+}
+
 function triggerAirMode() {
   const allLetters = document.querySelectorAll('.hero-content h1 .letter');
   allLetters.forEach((l, i) => {
@@ -560,6 +619,7 @@ function triggerPennyConfetti() {
       setTimeout(() => {
         const card = document.createElement('div');
         card.style.position = 'absolute';
+        card.style.willChange = 'transform';
         card.style.top = '-150px';
         card.style.left = Math.random() * 95 + 'vw';
         card.style.width = '80px';
