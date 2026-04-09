@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 3. Logo spin code + letter spin secret
   const logo = document.querySelector('.floating-logo-container');
-  const h1 = document.querySelector('.hero-content h1');
   let logoClicks = 0;
   if (logo) {
     logo.addEventListener('click', () => {
