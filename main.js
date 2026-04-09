@@ -119,7 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // are always at different phases — no synchronized bright band
             cols = Array.from({ length: numCols }, () => ({
               y: Math.random() * ch,
-              speed: fontSize * (0.3 + Math.random() * 0.8),
+              speed: fontSize * (0.1 + Math.random() * 0.25),
+              brightness: 0.5 + Math.random() * 0.5,
             }));
             return true;
           }
@@ -133,8 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let i = 0; i < cols.length; i++) {
               const col = cols[i];
-              // Bright head only — fade overlay handles the trail
-              ctx.fillStyle = '#9f9';
+              // Vary brightness per column for organic effect
+              const b = Math.round(180 * col.brightness);
+              ctx.fillStyle = `rgb(0, ${b}, 0)`;
               ctx.fillText(letters[Math.floor(Math.random() * letters.length)], i * fontSize + 2, col.y);
 
               col.y += col.speed;
@@ -143,7 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
               // so restarts are staggered — no dead zones, always active
               if (col.y > ch) {
                 col.y = -fontSize * (1 + Math.floor(Math.random() * 8));
-                col.speed = fontSize * (0.4 + Math.random() * 0.7);
+                col.speed = fontSize * (0.1 + Math.random() * 0.25);
+                col.brightness = 0.5 + Math.random() * 0.5;
               }
             }
           }
