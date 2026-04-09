@@ -38,16 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('click', () => {
       // Juicy animation
       letter.classList.add('boop');
-      setTimeout(() => letter.classList.remove('boop'), 400);
+      setTimeout(() => letter.classList.remove('boop'), 500);
 
       // Record letter click
       clickHistory.push(letter.textContent.toLowerCase());
-      if (clickHistory.length > 5) clickHistory.shift(); // Keep history short to avoid memory bloat
+      if (clickHistory.length > 5) clickHistory.shift();
 
-      // Check if they spelled 'pie' 
+      // Check if they spelled 'pie'
       if (clickHistory.slice(-3).join('') === 'pie') {
         triggerSecretMode();
-        clickHistory = []; // puzzle reset
+        clickHistory = [];
+      }
+
+      // Check if they spelled 'air'
+      if (clickHistory.slice(-3).join('') === 'air') {
+        triggerAirMode();
+        clickHistory = [];
       }
     });
   });
@@ -430,6 +436,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchend', endDrag);
   }
 });
+
+function triggerAirMode() {
+  const allLetters = document.querySelectorAll('.hero-content h1 .letter');
+  allLetters.forEach((l, i) => {
+    const xRange = (Math.random() - 0.5) * 120;
+    const rot = (Math.random() - 0.5) * 40;
+    l.style.setProperty('--air-x', `${xRange}px`);
+    l.style.setProperty('--air-rot', `${rot}deg`);
+    setTimeout(() => {
+      l.classList.add('air-scatter');
+      setTimeout(() => l.classList.remove('air-scatter'), 1600);
+    }, i * 60);
+  });
+}
 
 function triggerSecretMode() {
   document.body.style.animation = "rainbowBg 5s infinite";
