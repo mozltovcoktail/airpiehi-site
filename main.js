@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     yearElement.textContent = new Date().getFullYear();
   }
 
+  // Contact button — email assembled in JS so it never appears in HTML source
+  const contactBtn = document.getElementById('contact-btn');
+  if (contactBtn) {
+    contactBtn.addEventListener('click', () => {
+      const parts = ['airpiehi', 'gmail', 'com'];
+      window.location.href = `mailto:${parts[0]}@${parts[1]}.${parts[2]}`;
+    });
+  }
+
   // 1. Split H1 letters for hover effects and interactions
   const h1 = document.querySelector('.hero-content h1');
   let letters = [];
