@@ -234,9 +234,17 @@ body.spin-page {
   transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), text-shadow 0.15s ease, color 0.2s ease;
   cursor: pointer;
   transform-origin: center bottom;
+  position: relative;
 }
 
-.hero-content h1 .letter:hover {
+.hero-content h1 .letter::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.hero-content h1 .letter:hover,
+.hero-content h1 .letter.letter-hover {
   transform: translate(-4px, -6px) scale(1.1);
   text-shadow: 8px 10px 0px #000000;
 }
@@ -249,6 +257,7 @@ body.spin-page {
 
 .hero-content h1 .letter.boop {
   animation: boop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  pointer-events: none;
 }
 
 @keyframes airFloat {

@@ -1,8 +1,5 @@
 import './style.css'
 
-let mouseX = 0, mouseY = 0;
-document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
-
 document.addEventListener('DOMContentLoaded', () => {
   // Set current year in footer
   const yearElement = document.getElementById('year');
@@ -38,22 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let clickHistory = [];
   
   letters.forEach((letter) => {
+    // Track hover via class so it persists through boop animation
+    // (CSS :hover won't re-evaluate without real mouse movement)
+    let leaveTimer;
+    letter.addEventListener('mouseenter', () => {
+      clearTimeout(leaveTimer);
+      letter.classList.add('letter-hover');
+    });
+    letter.addEventListener('mouseleave', () => {
+      leaveTimer = setTimeout(() => letter.classList.remove('letter-hover'), 40);
+    });
+
     letter.addEventListener('click', () => {
       // Juicy animation
       letter.classList.add('boop');
-      setTimeout(() => {
-        letter.classList.remove('boop');
-        // :hover doesn't re-evaluate unless mouse moves — check manually
-        const rect = letter.getBoundingClientRect();
-        const isOver = mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom;
-        if (isOver) {
-          letter.style.transition = 'none';
-          letter.style.transform = 'translate(-4px, -6px) scale(1.1)';
-          letter.offsetHeight;
-          letter.style.transition = '';
-          letter.style.transform = '';
-        }
-      }, 400);
+      setTimeout(() => letter.classList.remove('boop'), 400);
 
       // Record letter click
       clickHistory.push(letter.textContent.toLowerCase());
@@ -455,8 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function triggerAirMode() {
   const allLetters = document.querySelectorAll('.hero-content h1 .letter');
   allLetters.forEach((l, i) => {
-    const xRange = (Math.random() - 0.5) * 500;
-    const rot = (Math.random() - 0.5) * 40;
+    const xRange = (Math.random() - 0.5) * 900;
+    const rot = (Math.random() - 0.5) * 60;
     l.style.setProperty('--air-x', `${xRange}px`);
     l.style.setProperty('--air-rot', `${rot}deg`);
     setTimeout(() => {
