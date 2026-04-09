@@ -55,8 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Logo spin code + letter spin secret
   const logo = document.querySelector('.floating-logo-container');
   let logoClicks = 0;
+  let floatResumeTimer = null;
   if (logo) {
     logo.addEventListener('click', () => {
+      // Pause the float, resume after 2.5s
+      logo.classList.add('float-paused');
+      if (floatResumeTimer) clearTimeout(floatResumeTimer);
+      floatResumeTimer = setTimeout(() => logo.classList.remove('float-paused'), 2500);
+
       logoClicks++;
       if (logoClicks >= 3) {
         document.body.classList.add('spin-page');
