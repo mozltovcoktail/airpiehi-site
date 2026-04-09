@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 3. Logo spin code + inverted mode secret
+  // 3. Logo spin code + page spin secret
   const logo = document.querySelector('.floating-logo-container');
   let logoClicks = 0;
   if (logo) {
@@ -61,8 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => logo.classList.remove('spin-boop'), 600);
 
       logoClicks++;
-      if (logoClicks >= 4) {
-        document.body.classList.toggle('inverted-mode');
+      if (logoClicks >= 3) {
+        document.body.classList.add('spin-page');
+        setTimeout(() => document.body.classList.remove('spin-page'), 600);
         logoClicks = 0;
       }
     });

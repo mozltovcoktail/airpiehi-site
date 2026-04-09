@@ -104,10 +104,16 @@ main {
   animation: spinBoop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
 }
 
-/* Secret Modes */
-.inverted-mode {
-  filter: invert(1) hue-rotate(180deg);
+@keyframes fullPageSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
+
+body.spin-page {
+  animation: fullPageSpin 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Secret Modes */
 
 @keyframes rainbowBg {
   0% { background: #d04e17; }
