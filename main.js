@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('click', () => {
       // Juicy animation
       letter.classList.add('boop');
-      setTimeout(() => letter.classList.remove('boop'), 500);
+      setTimeout(() => letter.classList.remove('boop'), 400);
 
       // Record letter click
       clickHistory.push(letter.textContent.toLowerCase());
@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function triggerAirMode() {
   const allLetters = document.querySelectorAll('.hero-content h1 .letter');
   allLetters.forEach((l, i) => {
-    const xRange = (Math.random() - 0.5) * 200;
+    const xRange = (Math.random() - 0.5) * 320;
     const rot = (Math.random() - 0.5) * 40;
     l.style.setProperty('--air-x', `${xRange}px`);
     l.style.setProperty('--air-rot', `${rot}deg`);
