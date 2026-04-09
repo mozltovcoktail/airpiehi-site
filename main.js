@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const ctx = canvas.getContext('2d');
           const letters = ['A', '1', 'R', 'P', 'I', 'E'];
-          const fontSize = 22;
+          const baseFontSize = 22;
           let cols = [], cw = 0, ch = 0;
 
           function init() {
@@ -114,39 +114,42 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, cw, ch);
 
-            const numCols = Math.ceil(cw / fontSize);
-            // Stagger y positions randomly across full canvas height so columns
-            // are always at different phases — no synchronized bright band
-            cols = Array.from({ length: numCols }, () => ({
-              y: Math.random() * ch,
-              speed: fontSize * (0.15 + Math.random() * 0.35),
-              brightness: 0.5 + Math.random() * 0.5,
-            }));
+            const numCols = Math.ceil(cw / baseFontSize);
+            cols = Array.from({ length: numCols }, () => {
+              const speedMultiplier = 0.1 + Math.random() * 0.9; // 0.1–1.0
+              const fontSizeVar = baseFontSize * (0.6 + Math.random() * 0.6); // 60–120% of base
+              return {
+                y: Math.random() * ch,
+                speed: fontSizeVar * speedMultiplier,
+                fontSize: fontSizeVar,
+                brightness: 0.4 + Math.random() * 0.6,
+              };
+            });
             return true;
           }
 
           function draw() {
             if (!cw) return;
-            // Slow fade produces the trailing glow naturally
             ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
             ctx.fillRect(0, 0, cw, ch);
-            ctx.font = `bold ${fontSize}px monospace`;
 
             for (let i = 0; i < cols.length; i++) {
               const col = cols[i];
-              // Vary brightness per column for organic effect
+              ctx.font = `bold ${Math.round(col.fontSize)}px monospace`;
               const b = Math.round(180 * col.brightness);
               ctx.fillStyle = `rgb(0, ${b}, 0)`;
-              ctx.fillText(letters[Math.floor(Math.random() * letters.length)], i * fontSize + 2, col.y);
+              ctx.fillText(letters[Math.floor(Math.random() * letters.length)], i * baseFontSize + 2, col.y);
 
               col.y += col.speed;
 
               // Always reset immediately, but start at varied heights above canvas
               // so restarts are staggered — no dead zones, always active
               if (col.y > ch) {
-                col.y = -fontSize * (1 + Math.floor(Math.random() * 8));
-                col.speed = fontSize * (0.15 + Math.random() * 0.35);
-                col.brightness = 0.5 + Math.random() * 0.5;
+                col.y = -col.fontSize * (1 + Math.floor(Math.random() * 8));
+                const speedMultiplier = 0.1 + Math.random() * 0.9;
+                col.fontSize = baseFontSize * (0.6 + Math.random() * 0.6);
+                col.speed = col.fontSize * speedMultiplier;
+                col.brightness = 0.4 + Math.random() * 0.6;
               }
             }
           }
