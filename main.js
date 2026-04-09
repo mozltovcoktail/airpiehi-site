@@ -41,9 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         letter.style.transition = 'none';
         letter.classList.remove('boop');
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          letter.style.transition = '';
-        }));
+        letter.offsetHeight; // force style flush so hover state applies now
+        letter.style.transition = '';
       }, 400);
 
       // Record letter click
@@ -446,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function triggerAirMode() {
   const allLetters = document.querySelectorAll('.hero-content h1 .letter');
   allLetters.forEach((l, i) => {
-    const xRange = (Math.random() - 0.5) * 320;
+    const xRange = (Math.random() - 0.5) * 500;
     const rot = (Math.random() - 0.5) * 40;
     l.style.setProperty('--air-x', `${xRange}px`);
     l.style.setProperty('--air-rot', `${rot}deg`);
