@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetLogoState() {
     onCooldown = false;
     logoClicks = 0;
-    logo.classList.remove('lean-in', 'float-paused', 'boop-tilt-1', 'boop-tilt-2');
+    logo.classList.remove('float-paused', 'boop-tilt-1', 'boop-tilt-2');
     logo.classList.add('tilt-reset');
     setTimeout(() => logo.classList.remove('tilt-reset'), 500);
   }
@@ -72,9 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     logo.addEventListener('click', () => {
       if (onCooldown) return;
 
-      // Cancel any pending lean-in
+      // Cancel any pending reset
       if (leanInTimer) clearTimeout(leanInTimer);
-      logo.classList.remove('lean-in');
 
       // Pause the float, resume after 2.5s
       logo.classList.add('float-paused');
@@ -95,15 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
           logo.classList.add(logoClicks === 1 ? 'boop-tilt-1' : 'boop-tilt-2');
         }, 600);
 
-        // After first click, lean in if not clicked again within 1.8s, then cooldown
+        // After first click, reset if not clicked again within 2s
         if (logoClicks === 1) {
           leanInTimer = setTimeout(() => {
-            logo.classList.remove('boop-tilt-1');
-            logo.classList.add('lean-in');
             onCooldown = true;
-            setTimeout(() => logo.classList.remove('lean-in'), 1000);
-            cooldownTimer = setTimeout(resetLogoState, 2500);
-          }, 1800);
+            cooldownTimer = setTimeout(resetLogoState, 800);
+          }, 2000);
         }
       }
     });
