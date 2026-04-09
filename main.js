@@ -99,25 +99,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let heartClicks = 0;
     let heartTimer;
     footerHeart.style.cursor = 'pointer';
-    footerHeart.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     footerHeart.addEventListener('click', () => {
       heartClicks++;
       clearTimeout(heartTimer);
-      // Grow with each click
-      const scale = 1 + heartClicks * 0.15;
+      // Grow with each tap, instant snap
+      const scale = heartClicks === 1 ? 2.5 : 2.5 + (heartClicks - 1) * 1.5;
+      footerHeart.style.transition = 'none';
       footerHeart.style.transform = `scale(${scale})`;
       heartTimer = setTimeout(() => {
         heartClicks = 0;
+        footerHeart.style.transition = 'transform 0.3s ease-out';
         footerHeart.style.transform = '';
-      }, 800);
+      }, 1500);
       if (heartClicks >= 5) {
         heartClicks = 0;
-        footerHeart.style.transform = 'scale(2.5)';
-        setTimeout(() => {
-          footerHeart.style.transform = '';
-          triggerHeartRain();
-          markSecret('hearts');
-        }, 200);
+        clearTimeout(heartTimer);
+        triggerHeartRain();
+        markSecret('hearts');
+        footerHeart.style.transition = 'transform 0.5s ease-out';
+        footerHeart.style.transform = '';
       }
     });
   }
@@ -169,9 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('mouseleave', () => {
       leaveTimer = setTimeout(() => letter.classList.remove('letter-hover'), 40);
     });
-    // On touch devices, clear hover after boop finishes so it doesn't stick
+    // On touch devices, clear hover so it doesn't stick
+    letter.addEventListener('touchstart', () => {
+      letter.classList.remove('letter-hover');
+    }, { passive: true });
     letter.addEventListener('touchend', () => {
-      setTimeout(() => letter.classList.remove('letter-hover'), 450);
+      setTimeout(() => letter.classList.remove('letter-hover'), 400);
     });
 
     letter.addEventListener('click', () => {
