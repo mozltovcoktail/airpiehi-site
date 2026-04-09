@@ -392,7 +392,7 @@ function triggerPennyConfetti() {
   const overlayText = document.createElement('div');
   overlayText.innerHTML = 'AUTHORIZATION AUTHORIZED';
   overlayText.style.fontFamily = 'monospace';
-  overlayText.style.fontSize = 'clamp(2rem, 8vw, 6rem)';
+  overlayText.style.fontSize = 'clamp(1.5rem, 6vw, 5rem)';
   overlayText.style.fontWeight = 'bold';
   overlayText.style.color = '#0f0';
   overlayText.style.textShadow = '0 0 20px #0f0, 4px 4px 0 #000';
@@ -400,6 +400,8 @@ function triggerPennyConfetti() {
   overlayText.style.border = '4px solid #0f0';
   overlayText.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
   overlayText.style.boxShadow = '10px 10px 0 #000';
+  overlayText.style.whiteSpace = 'nowrap';
+  overlayText.style.overflow = 'hidden';
   overlayText.style.opacity = '0';
   overlayText.style.transform = 'scale(0.8)';
   container.appendChild(overlayText);
