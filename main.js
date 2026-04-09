@@ -7,13 +7,396 @@ document.addEventListener('DOMContentLoaded', () => {
     yearElement.textContent = new Date().getFullYear();
   }
 
-  // Add click interaction for exploration
-  const exploreBtn = document.getElementById('explore-btn');
-  if (exploreBtn) {
-    exploreBtn.addEventListener('click', () => {
-      document.getElementById('services').scrollIntoView({
-        behavior: 'smooth'
-      });
+  // 1. Split H1 letters for hover effects and interactions
+  const h1 = document.querySelector('.hero-content h1');
+  let letters = [];
+  if (h1) {
+    const text = h1.textContent;
+    h1.textContent = '';
+    h1.setAttribute('aria-label', text);
+    
+    for (let char of text) {
+      if (char === ' ') {
+        const space = document.createElement('span');
+        space.innerHTML = '&nbsp;';
+        h1.appendChild(space);
+      } else {
+        const span = document.createElement('span');
+        span.textContent = char;
+        span.classList.add('letter');
+        span.setAttribute('aria-hidden', 'true');
+        h1.appendChild(span);
+        letters.push(span);
+      }
+    }
+  }
+
+  // 2. Secret "PIE" puzzle
+  let clickHistory = [];
+  
+  letters.forEach((letter) => {
+    letter.addEventListener('click', () => {
+      // Juicy animation
+      letter.classList.add('boop');
+      setTimeout(() => letter.classList.remove('boop'), 400);
+
+      // Record letter click
+      clickHistory.push(letter.textContent.toLowerCase());
+      if (clickHistory.length > 5) clickHistory.shift(); // Keep history short to avoid memory bloat
+
+      // Check if they spelled 'pie' 
+      if (clickHistory.slice(-3).join('') === 'pie') {
+        triggerSecretMode();
+        clickHistory = []; // puzzle reset
+      }
+    });
+  });
+
+  // 3. Logo spin code + inverted mode secret
+  const logo = document.querySelector('.floating-logo-container');
+  let logoClicks = 0;
+  if (logo) {
+    logo.addEventListener('click', () => {
+      logo.classList.add('spin-boop');
+      setTimeout(() => logo.classList.remove('spin-boop'), 600);
+
+      logoClicks++;
+      if (logoClicks >= 4) {
+        document.body.classList.toggle('inverted-mode');
+        logoClicks = 0;
+      }
     });
   }
+
+  // 4. Top secret button reveal
+  const secretBtn = document.getElementById('top-secret-btn');
+  const secretText = document.getElementById('classified-secret');
+  const secretDesc = document.getElementById('top-secret-desc');
+  
+  if (secretBtn && secretText && secretDesc) {
+    secretBtn.addEventListener('click', () => {
+      // Juice it
+      secretBtn.classList.add('boop');
+      setTimeout(() => secretBtn.classList.remove('boop'), 400);
+      
+      // Reveal it by swapping the paragraph
+      if (secretText.style.display === 'none') {
+        secretText.style.display = 'block';
+        secretDesc.style.opacity = '0';
+        secretDesc.style.position = 'absolute';
+        secretDesc.style.pointerEvents = 'none';
+        secretBtn.textContent = 'HIDE SECRET';
+        
+        // Initialize Matrix
+        const canvas = document.getElementById('matrix-canvas');
+        if (canvas && !canvas.dataset.matrixStarted) {
+          canvas.dataset.matrixStarted = 'true';
+          const ctx = canvas.getContext('2d');
+          canvas.width = canvas.offsetWidth;
+          canvas.height = canvas.offsetHeight;
+          
+          const letters = ['🥧', 'P', 'I', 'E', '@', '#', '0', '1'];
+          const fontSize = 32;
+          const columns = Math.ceil(canvas.width / fontSize);
+          const drops = [];
+          for(let x = 0; x < columns; x++) drops[x] = 1; 
+          
+          function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = 'bold ' + fontSize + 'px monospace';
+            ctx.textAlign = 'center';
+            for(let i = 0; i < drops.length; i++) {
+              const text = letters[Math.floor(Math.random() * letters.length)];
+              ctx.fillText(text, i * fontSize + (fontSize/2), drops[i] * fontSize);
+              if(drops[i] * fontSize > canvas.height && Math.random() > 0.95) drops[i] = 0;
+              drops[i]++;
+            }
+          }
+          setInterval(draw, 120);
+          
+          window.addEventListener('resize', () => {
+            if (canvas.offsetWidth && canvas.offsetHeight) {
+              canvas.width = canvas.offsetWidth;
+              canvas.height = canvas.offsetHeight;
+            }
+          });
+        }
+      } else {
+        secretText.style.display = 'none';
+        secretDesc.style.opacity = '1';
+        secretDesc.style.position = 'static';
+        secretDesc.style.pointerEvents = 'auto';
+        secretBtn.textContent = 'Top Secret';
+      }
+    });
+  }
+
+  // 4b. Secret Code Validator
+  const codeInput = document.getElementById('secret-code-input');
+  const codeSubmit = document.getElementById('secret-code-submit');
+  const codeResponse = document.getElementById('secret-code-response');
+
+  if (codeInput && codeSubmit && codeResponse) {
+    const handleCodeSubmit = () => {
+      const code = codeInput.value.trim().toUpperCase();
+      if (!code) return;
+
+      codeSubmit.classList.add('boop');
+      setTimeout(() => codeSubmit.classList.remove('boop'), 200);
+
+      if (code === 'CARDVAULT' || code === 'PENNY' || code === 'PIE') {
+        codeResponse.style.opacity = '1';
+        codeResponse.style.color = '#0f0';
+        codeResponse.innerHTML = 'VERIFIED. REDIRECTING...';
+        codeInput.value = '';
+        setTimeout(() => {
+          triggerPennyConfetti();
+          codeResponse.style.opacity = '0';
+        }, 1500);
+      } else {
+        codeResponse.style.opacity = '1';
+        codeResponse.style.color = '#f00';
+        codeResponse.innerHTML = 'ERR: ACCESS DENIED. LOGGED.';
+        codeInput.value = '';
+        setTimeout(() => {
+           codeResponse.style.opacity = '0';
+        }, 3000);
+      }
+    };
+
+    codeSubmit.addEventListener('click', handleCodeSubmit);
+    codeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleCodeSubmit();
+    });
+  }
+
+  // 5. Overscroll upside down secret
+  let isUpsideDown = false;
+
+  function flipSite() {
+    isUpsideDown = true;
+    document.body.classList.add('upside-down');
+    const ohNoWrapper = document.getElementById('oh-no-wrapper');
+    if (ohNoWrapper) ohNoWrapper.style.display = 'block';
+  }
+
+  const ohNoBtns = document.querySelectorAll('.oh-no-btn');
+  ohNoBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      isUpsideDown = false;
+      document.body.classList.remove('upside-down');
+      document.getElementById('oh-no-wrapper').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Footer explicit click/touch and drag
+  const footer = document.querySelector('footer');
+  let isDraggingFooter = false;
+  let footerDragStartY = 0;
+  const belowFold = document.getElementById('below-the-fold');
+  let bounceTimeout = null;
+
+  function showBelowFold(amount) {
+    if (!belowFold) return;
+    const pct = Math.min(amount / 400, 1);
+    belowFold.style.transform = `translateY(${(1 - pct) * 100}%)`;
+  }
+
+  function hideBelowFold() {
+    if (!belowFold) return;
+    belowFold.style.transition = 'transform 0.3s ease';
+    belowFold.style.transform = 'translateY(100%)';
+  }
+
+  // Show on wheel overscroll at bottom — accumulate ticks
+  let wheelAccum = 0;
+  let wheelDecayTimer = null;
+
+  window.addEventListener('wheel', (e) => {
+    const scrollMaxY = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY >= scrollMaxY - 2 && e.deltaY > 0) {
+      wheelAccum = Math.min(wheelAccum + e.deltaY, 400);
+      showBelowFold(wheelAccum);
+      clearTimeout(wheelDecayTimer);
+      wheelDecayTimer = setTimeout(() => {
+        wheelAccum = 0;
+        hideBelowFold();
+      }, 600);
+    }
+  }, { passive: true });
+
+
+  if (footer) {
+    footer.style.cursor = 'grab';
+    
+    const FLIP_THRESHOLD = 200;
+
+    const startDrag = (y) => {
+      isDraggingFooter = true;
+      footerDragStartY = y;
+      footer.style.cursor = 'grabbing';
+      document.body.style.transition = 'none';
+      clearTimeout(bounceTimeout);
+      belowFold.style.transition = 'none';
+    };
+
+    const moveDrag = (y) => {
+      if (!isDraggingFooter || isUpsideDown) return;
+      const dragDelta = Math.max(0, footerDragStartY - y);
+      const pull = Math.pow(dragDelta, 0.7) * -1.2;
+      document.body.style.transform = `translateY(${pull}px)`;
+      showBelowFold(dragDelta);
+
+      if (dragDelta > FLIP_THRESHOLD) {
+        isDraggingFooter = false;
+        footer.style.cursor = 'grab';
+        document.body.style.transform = '';
+        document.body.style.transition = '';
+        hideBelowFold();
+        flipSite();
+      }
+    };
+
+    const endDrag = () => {
+      if (isDraggingFooter) {
+        isDraggingFooter = false;
+        footer.style.cursor = 'grab';
+        document.body.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        document.body.style.transform = '';
+        setTimeout(() => { document.body.style.transition = ''; }, 400);
+        hideBelowFold();
+      }
+    };
+
+    footer.addEventListener('mousedown', (e) => {
+      startDrag(e.clientY);
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientY));
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('mouseleave', endDrag);
+
+    // Touch support
+    footer.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientY), {passive: true});
+    window.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientY), {passive: true});
+    window.addEventListener('touchend', endDrag);
+  }
 });
+
+function triggerSecretMode() {
+  document.body.style.animation = "rainbowBg 5s infinite";
+  
+  const cards = document.querySelectorAll('.app-card');
+  cards.forEach((card, i) => {
+    setTimeout(() => {
+      card.classList.add('party-mode');
+    }, i * 150);
+  });
+  
+  // Turn it off after 8 seconds
+  setTimeout(() => {
+     cards.forEach(card => card.classList.remove('party-mode'));
+     document.body.style.animation = "";
+  }, 8000);
+}
+
+function triggerPennyConfetti() {
+  const logo = document.querySelector('.floating-logo');
+  const logoSrc = logo ? logo.src : '/logo.png';
+  
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.inset = '0';
+  container.style.pointerEvents = 'none';
+  container.style.zIndex = '10000';
+  container.style.overflow = 'hidden';
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.justifyContent = 'center';
+  document.body.appendChild(container);
+
+  // Success message overlay
+  const overlayText = document.createElement('div');
+  overlayText.innerHTML = 'PENNY AUTHORIZED';
+  overlayText.style.fontFamily = 'monospace';
+  overlayText.style.fontSize = 'clamp(2rem, 8vw, 6rem)';
+  overlayText.style.fontWeight = 'bold';
+  overlayText.style.color = '#0f0';
+  overlayText.style.textShadow = '0 0 20px #0f0, 4px 4px 0 #000';
+  overlayText.style.padding = '2rem';
+  overlayText.style.border = '4px solid #0f0';
+  overlayText.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  overlayText.style.boxShadow = '10px 10px 0 #000';
+  overlayText.style.opacity = '0';
+  overlayText.style.transform = 'scale(0.8)';
+  container.appendChild(overlayText);
+
+  // Animate the overlay
+  overlayText.animate([
+    { opacity: 0, transform: 'scale(0.8)' },
+    { opacity: 1, transform: 'scale(1)' },
+    { opacity: 1, transform: 'scale(1)' },
+    { opacity: 0, transform: 'scale(1.2)' }
+  ], {
+    duration: 3500,
+    easing: 'ease-out'
+  });
+
+  const colors = ['#c4a882', '#ffee00', '#a855f7', '#ff3b3b', '#ffb366', '#4db8ff', '#ffffff'];
+
+  // Start raining cards after a small delay
+  setTimeout(() => {
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => {
+        const card = document.createElement('div');
+        card.style.position = 'absolute';
+        card.style.top = '-150px';
+        card.style.left = Math.random() * 95 + 'vw';
+        card.style.width = '80px';
+        card.style.height = '112px';
+        card.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        card.style.border = '4px solid #000';
+        card.style.borderRadius = '6px';
+        card.style.boxShadow = '4px 4px 0 #000';
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.justifyContent = 'center';
+        card.style.padding = '8px';
+        
+        const img = document.createElement('img');
+        img.src = logoSrc;
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        img.style.filter = 'drop-shadow(2px 2px 0px rgba(0,0,0,0.5))';
+        card.appendChild(img);
+
+        container.appendChild(card);
+
+        // Better physics: start slow, fall fast with cubic-bezier
+        const fallDuration = 1500 + Math.random() * 2000;
+        const startX = (Math.random() - 0.5) * 50; 
+        const endX = startX + (Math.random() - 0.5) * 200; // Drift sideways
+        const rotation = -45 + Math.random() * 90;
+        const endRotation = rotation + (-360 + Math.random() * 720);
+        
+        const animation = card.animate([
+          { transform: `translate(${startX}px, 0) rotate(${rotation}deg)` },
+          { transform: `translate(${endX}px, 120vh) rotate(${endRotation}deg)` }
+        ], {
+          duration: fallDuration,
+          easing: 'cubic-bezier(0.4, 0, 1, 1)' // Accelerates like gravity
+        });
+
+        animation.onfinish = () => card.remove();
+      }, Math.random() * 3500);
+    }
+  }, 1000);
+
+  // Clean up container after all cards should have fallen
+  setTimeout(() => {
+    container.remove();
+  }, 8000);
+}
