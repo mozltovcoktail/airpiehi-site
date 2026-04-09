@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // are always at different phases — no synchronized bright band
             cols = Array.from({ length: numCols }, () => ({
               y: Math.random() * ch,
-              speed: fontSize * (0.4 + Math.random() * 0.6),
+              speed: fontSize * (0.15 + Math.random() * 0.35),
               brightness: 0.5 + Math.random() * 0.5,
             }));
             return true;
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
               // so restarts are staggered — no dead zones, always active
               if (col.y > ch) {
                 col.y = -fontSize * (1 + Math.floor(Math.random() * 8));
-                col.speed = fontSize * (0.4 + Math.random() * 0.6);
+                col.speed = fontSize * (0.15 + Math.random() * 0.35);
                 col.brightness = 0.5 + Math.random() * 0.5;
               }
             }
