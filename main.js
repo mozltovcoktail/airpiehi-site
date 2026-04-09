@@ -38,7 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('click', () => {
       // Juicy animation
       letter.classList.add('boop');
-      setTimeout(() => letter.classList.remove('boop'), 400);
+      setTimeout(() => {
+        letter.classList.remove('boop');
+        if (letter.matches(':hover')) {
+          // Snap directly to hover state — skip the origin frame
+          letter.style.transition = 'none';
+          letter.style.transform = 'translate(-4px, -6px) scale(1.1)';
+          letter.offsetHeight; // flush
+          letter.style.transition = '';
+          letter.style.transform = '';
+        }
+      }, 400);
 
       // Record letter click
       clickHistory.push(letter.textContent.toLowerCase());
