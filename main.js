@@ -38,7 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     letter.addEventListener('click', () => {
       // Juicy animation
       letter.classList.add('boop');
-      setTimeout(() => letter.classList.remove('boop'), 400);
+      setTimeout(() => {
+        letter.style.transition = 'none';
+        letter.classList.remove('boop');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          letter.style.transition = '';
+        }));
+      }, 400);
 
       // Record letter click
       clickHistory.push(letter.textContent.toLowerCase());
