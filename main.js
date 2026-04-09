@@ -68,19 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
         setEyeState('awake');
         setTimeout(() => markSecret('eye'), 300);
       } else if (secretEye.classList.contains('awake') || secretEye.classList.contains('excited')) {
-        // Already awake — react with a quick blink
+        // Already awake — pupil darts around
         const pupil = document.querySelector('.eye-pupil');
         if (pupil) {
           pupil.animate([
             { transform: 'translate(0, 0)' },
-            { transform: 'translate(4px, -2px)' },
-            { transform: 'translate(-3px, 1px)' },
+            { transform: 'translate(5px, -3px)' },
+            { transform: 'translate(-4px, 2px)' },
+            { transform: 'translate(3px, 3px)' },
             { transform: 'translate(0, 0)' }
-          ], { duration: 300, easing: 'ease-in-out' });
+          ], { duration: 400, easing: 'ease-in-out' });
         }
-        // Quick blink
-        setEyeState(null);
-        setTimeout(() => setEyeState('awake'), 150);
+        setEyeState('awake');
       } else {
         setEyeState('awake');
       }
