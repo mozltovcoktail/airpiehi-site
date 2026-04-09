@@ -74,8 +74,8 @@
                    <p id="top-secret-desc">Our next pie is currently in the oven. It's classified, but will likely be quite good and important for a very select group of people.</p>
                    <div id="classified-secret" style="display: none; background: #000; color: #0f0; padding: 1rem 0; font-family: monospace; border-radius: var(--border-radius-sm); border: 2px solid #0f0; font-weight: bold; position: absolute; inset: 0; overflow: hidden; height: 100%; box-sizing: border-box;">
                      <canvas id="matrix-canvas" style="position: absolute; top: 0; left: 0; right: 0; bottom: 80px; width: 100%; height: calc(100% - 80px); z-index: 0;"></canvas>
-                     <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 1; height: 80px; padding: 0 1rem; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 0.5rem;">
-                       <div style="background: #000; border-top: 1px dashed #0f0; display: flex; align-items: center; gap: 0.5rem;">
+                     <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 1; height: 80px; padding: 0 1rem; display: flex; flex-direction: column;">
+                       <div style="background: #000; border-top: 1px dashed #0f0; display: flex; align-items: center; gap: 0.5rem; flex: 1;">
                          <span>></span>
                          <input type="text" id="secret-code-input" placeholder="ENTER ACCESS CODE" style="flex: 1; background: #000; border: none; color: #0f0; font-family: monospace; font-size: 1.25rem; outline: none; min-width: 0;" autocomplete="off" spellcheck="false" />
                          <button id="secret-code-submit" style="background: #000; border: 1px solid #0f0; color: #0f0; padding: 0.35rem 0.75rem; font-family: monospace; cursor: pointer; font-weight: bold; font-size: 1.1rem;">SUBMIT</button>
