@@ -52,8 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 3. Logo spin code + page spin secret
+  // 3. Logo spin code + letter spin secret
   const logo = document.querySelector('.floating-logo-container');
+  const h1 = document.querySelector('.hero-content h1');
   let logoClicks = 0;
   if (logo) {
     logo.addEventListener('click', () => {
@@ -62,8 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       logoClicks++;
       if (logoClicks >= 3) {
-        document.body.classList.add('spin-page');
-        setTimeout(() => document.body.classList.remove('spin-page'), 600);
+        if (h1) {
+          h1.classList.add('spin-letters');
+          setTimeout(() => h1.classList.remove('spin-letters'), 600);
+        }
         logoClicks = 0;
       }
     });
