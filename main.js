@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (canvas.matrixObserver) canvas.matrixObserver.disconnect();
 
           const ctx = canvas.getContext('2d');
-          const letters = ['A', '1', 'R', 'P', 'I', 'E'];
+          const letters = ['A', '1', 'R', 'P', '1', 'E'];
           const baseFontSize = 22;
           let cols = [], cw = 0, ch = 0;
 
