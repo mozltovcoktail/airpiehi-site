@@ -116,8 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(heartTimer);
         triggerHeartRain();
         markSecret('hearts');
-        footerHeart.style.transition = 'transform 0.5s ease-out';
-        footerHeart.style.transform = '';
+        // Big fun pop then quick deflate
+        footerHeart.style.transition = 'none';
+        footerHeart.animate([
+          { transform: `scale(${scale})` },
+          { transform: `scale(${scale * 1.6})`, offset: 0.25, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' },
+          { transform: 'scale(1)' },
+        ], { duration: 500, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
+          footerHeart.style.transform = '';
+        };
       }
     });
   }
@@ -161,13 +168,11 @@ document.addEventListener('DOMContentLoaded', () => {
   letters.forEach((letter) => {
     // Track hover via class so it persists through boop animation
     // (CSS :hover won't re-evaluate without real mouse movement)
-    let leaveTimer;
     letter.addEventListener('mouseenter', () => {
-      clearTimeout(leaveTimer);
       letter.classList.add('letter-hover');
     });
     letter.addEventListener('mouseleave', () => {
-      leaveTimer = setTimeout(() => letter.classList.remove('letter-hover'), 40);
+      letter.classList.remove('letter-hover');
     });
     // On touch devices, clear hover so it doesn't stick
     letter.addEventListener('touchstart', () => {
@@ -175,6 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
     letter.addEventListener('touchend', () => {
       setTimeout(() => letter.classList.remove('letter-hover'), 400);
+    });
+
+    // Safety net: clear hover if pointer leaves letter bounds
+    // (mouseleave can miss when transform shifts the element)
+    letter.addEventListener('pointerleave', () => {
+      letter.classList.remove('letter-hover');
     });
 
     letter.addEventListener('click', () => {
@@ -201,6 +212,30 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // mousemove arbitrator: uses elementFromPoint (transform-aware) to determine
+  // which letter is visually under the cursor and force-switches hover state.
+  // Fixes the case where a lifted/scaled letter's hit area overlaps the next
+  // letter, preventing its mouseenter from ever firing.
+  if (letters.length) {
+    document.addEventListener('mousemove', (e) => {
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      if (under && under.classList.contains('letter')) {
+        // Correct letter is under cursor — clear all others, ensure this one is set
+        letters.forEach(l => { if (l !== under) l.classList.remove('letter-hover'); });
+        under.classList.add('letter-hover');
+      } else {
+        // Not over any letter — clear any stale hover outside a small buffer
+        document.querySelectorAll('.letter.letter-hover').forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (e.clientX < r.left - 4 || e.clientX > r.right + 4 ||
+              e.clientY < r.top  - 4 || e.clientY > r.bottom + 4) {
+            el.classList.remove('letter-hover');
+          }
+        });
+      }
+    });
+  }
 
   // 3. Logo spin code + letter spin secret
   const logo = document.querySelector('.floating-logo-container');
@@ -582,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientY), {passive: true});
     window.addEventListener('touchend', endDrag);
   }
+
 });
 
 function triggerHeartRain() {
@@ -636,8 +672,19 @@ function triggerAirMode() {
   });
 }
 
+let partyRafId = null;
+
 function triggerSecretMode() {
   document.body.style.animation = "rainbowBg 5s infinite";
+
+  // Keep --bg-color in lockstep with the body's animated background so
+  // the eye lids (which use var(--bg-color)) always match the page color.
+  function syncPartyColor() {
+    const color = getComputedStyle(document.body).backgroundColor;
+    document.documentElement.style.setProperty('--bg-color', color);
+    partyRafId = requestAnimationFrame(syncPartyColor);
+  }
+  partyRafId = requestAnimationFrame(syncPartyColor);
 
   const logo = document.querySelector('.floating-logo-container');
   const tagline = document.querySelector('.hero-content p');
@@ -650,6 +697,13 @@ function triggerSecretMode() {
   if (sectionTitle) setTimeout(() => sectionTitle.classList.add('hero-party'), 100);
   if (comingSoon) setTimeout(() => comingSoon.classList.add('hero-party'), 200);
   if (heart) setTimeout(() => heart.classList.add('heart-party'), 300);
+  if (secretEye) {
+    clearTimeout(eyeTimer1);
+    clearTimeout(eyeTimer2);
+    setEyeState('excited');
+    secretEye.classList.add('party-eye');
+    setTimeout(() => setEyeState('awake'), 400);
+  }
 
   const cards = document.querySelectorAll('.app-card');
   cards.forEach((card, i) => {
@@ -676,6 +730,12 @@ function triggerSecretMode() {
     settle(heart, 'heart-party');
     cards.forEach(card => settle(card, 'party-mode'));
     document.body.style.animation = "";
+    cancelAnimationFrame(partyRafId);
+    document.documentElement.style.removeProperty('--bg-color');
+    if (secretEye) {
+      secretEye.classList.remove('party-eye');
+      eyeToSleep();
+    }
   }, 8000);
 }
 
@@ -781,3 +841,137 @@ function triggerPennyConfetti() {
     container.remove();
   }, 8000);
 }
+
+// ── Playdate Crank ────────────────────────────────────────────────────────────
+(function initPlaydateCrank() {
+  const playdateCard = document.querySelector('.neutralize-playdate');
+  if (!playdateCard) return;
+
+  const crankEl    = playdateCard.querySelector('.playdate-crank');
+  const crankBase  = playdateCard.querySelector('.crank-base');
+  const crankArm   = playdateCard.querySelector('.crank-arm');
+  const statusEl   = document.getElementById('playdate-status');
+  if (!crankEl || !crankArm) return;
+
+  let cranking   = false;
+  let lastAngle  = 0;
+  let armAngle   = 40;   // starting visual angle
+  let totalDeg   = 0;
+  let ratchetAt  = 0;
+  const RATCHET_STEP = 28; // degrees per click
+
+  const messages = [
+    'Coming Soon',
+    'Still Baking...',
+    'Winding Up...',
+    'Keep Going...',
+    'Almost Cranked!',
+    'Soon™',
+    'You Found The Crank!',
+    '...Almost There...',
+    'For Real Though. Soon.',
+    'Okay Okay! Loading...',
+  ];
+  let msgIndex = 0;
+
+  function pivotCenter() {
+    const r = crankBase.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  function angleTo(cx, cy) {
+    const p = pivotCenter();
+    return Math.atan2(cy - p.y, cx - p.x) * 180 / Math.PI;
+  }
+
+  function clampDelta(d) {
+    while (d >  180) d -= 360;
+    while (d < -180) d += 360;
+    return d;
+  }
+
+  function doRatchet() {
+    // Card jolts like a wind-up ratchet click
+    playdateCard.animate([
+      { transform: 'translateX(0) rotate(0deg)' },
+      { transform: 'translateX(-4px) rotate(-0.6deg)' },
+      { transform: 'translateX(3px)  rotate( 0.4deg)' },
+      { transform: 'translateX(0) rotate(0deg)' },
+    ], { duration: 90, easing: 'ease-out' });
+  }
+
+  function cycleMessage() {
+    msgIndex = (msgIndex + 1) % messages.length;
+    if (!statusEl) return;
+    const next = messages[msgIndex];
+    statusEl.animate(
+      [{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-10px)' }],
+      { duration: 120, fill: 'forwards' }
+    ).onfinish = () => {
+      statusEl.textContent = next;
+      statusEl.animate(
+        [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 120, fill: 'forwards' }
+      );
+    };
+  }
+
+  function onMove(cx, cy) {
+    const angle = angleTo(cx, cy);
+    const delta = clampDelta(angle - lastAngle);
+    lastAngle = angle;
+    armAngle += delta;
+    crankArm.style.transform = `rotate(${armAngle}deg)`;
+
+    totalDeg += Math.abs(delta);
+
+    // Ratchet click every N degrees
+    const clicks = Math.floor(totalDeg / RATCHET_STEP);
+    if (clicks > Math.floor(ratchetAt / RATCHET_STEP)) {
+      ratchetAt = totalDeg;
+      doRatchet();
+    }
+
+    // Full rotation → cycle status text
+    if (totalDeg >= 360) {
+      totalDeg -= 360;
+      cycleMessage();
+    }
+  }
+
+  crankEl.addEventListener('mousedown', (e) => {
+    cranking = true;
+    lastAngle = angleTo(e.clientX, e.clientY);
+    crankEl.style.cursor = 'grabbing';
+    playdateCard.classList.add('cranking');
+    e.preventDefault();
+  });
+
+  crankEl.addEventListener('touchstart', (e) => {
+    cranking = true;
+    const t = e.touches[0];
+    lastAngle = angleTo(t.clientX, t.clientY);
+    playdateCard.classList.add('cranking');
+    e.stopPropagation();
+  }, { passive: true });
+
+  document.addEventListener('mousemove', (e) => {
+    if (cranking) onMove(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('touchmove', (e) => {
+    if (cranking) onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  document.addEventListener('mouseup', () => {
+    if (cranking) {
+      cranking = false;
+      crankEl.style.cursor = 'grab';
+      playdateCard.classList.remove('cranking');
+    }
+  });
+  document.addEventListener('touchend', () => {
+    cranking = false;
+    playdateCard.classList.remove('cranking');
+  });
+})();
