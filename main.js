@@ -703,9 +703,9 @@ document.addEventListener('DOMContentLoaded', () => {
         topLid.style.transform = 'translateY(-22px)';
         bottomLid.style.transform = 'translateY(16px)';
 
-        // Eyeball settles on red
-        ball.style.background = '#d04e17';
-        ball.style.borderColor = '#d04e17';
+        // Eyeball settles on bright red
+        ball.style.background = '#ff0000';
+        ball.style.borderColor = '#ff0000';
         ball.style.transition = '';
 
         // After 2s: fade eyeball to white
