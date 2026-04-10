@@ -311,10 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize Matrix
         const canvas = document.getElementById('matrix-canvas');
         if (canvas) {
-          if (window.matrixInterval) clearInterval(window.matrixInterval);
-          if (window.matrixObserver) window.matrixObserver.disconnect();
-          if (canvas.matrixInterval) clearInterval(canvas.matrixInterval);
-          if (canvas.matrixObserver) canvas.matrixObserver.disconnect();
+          if (window.matrixInterval) { clearInterval(window.matrixInterval); window.matrixInterval = null; }
+          if (canvas.matrixInterval) { clearInterval(canvas.matrixInterval); canvas.matrixInterval = null; }
 
           const ctx = canvas.getContext('2d');
           const letters = ['A', '1', 'R', 'P', '1', 'E'];
@@ -407,20 +405,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
-          let started = false;
-          const observer = new ResizeObserver(() => {
-            if (!started) {
-              if (init()) {
-                started = true;
-                window.matrixInterval = setInterval(draw, 50);
-                canvas.matrixInterval = window.matrixInterval;
-              }
+          let attempts = 0;
+          function tryStart() {
+            if (window.matrixInterval) return; // already running
+            if (++attempts > 20) return;       // give up after ~2s
+            if (init()) {
+              window.matrixInterval = setInterval(draw, 50);
+              canvas.matrixInterval = window.matrixInterval;
+            } else {
+              setTimeout(tryStart, 100);
             }
-            // don't re-init on resize once running — avoids jarring canvas reset
-          });
-          observer.observe(canvas.parentElement);
-          window.matrixObserver = observer;
-          canvas.matrixObserver = observer;
+          }
+          setTimeout(tryStart, 50); // defer to let layout settle; works in hidden tabs too
         }
       } else {
         secretText.style.display = 'none';
@@ -430,9 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
         secretBtn.textContent = 'Top Secret';
         // Stop matrix when hidden
         if (window.matrixInterval) { clearInterval(window.matrixInterval); window.matrixInterval = null; }
-        if (window.matrixObserver) { window.matrixObserver.disconnect(); window.matrixObserver = null; }
-        const canvas = document.getElementById('matrix-canvas');
-        if (canvas) { canvas.matrixInterval = null; canvas.matrixObserver = null; }
+        const hiddenCanvas = document.getElementById('matrix-canvas');
+        if (hiddenCanvas) hiddenCanvas.matrixInterval = null;
       }
     });
   }
