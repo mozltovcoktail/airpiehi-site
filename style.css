@@ -661,6 +661,13 @@ body.spin-page {
   transition: all 0.2s ease;
 }
 
+.store-btn.soon-btn::after {
+  content: ' (Soon)';
+  font-size: 0.7em;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
 .store-btn:hover {
   background: var(--accent-color);
   color: #ffffff;
