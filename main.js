@@ -280,13 +280,11 @@ document.addEventListener('DOMContentLoaded', () => {
           logo.classList.add(logoClicks === 1 ? 'boop-tilt-1' : 'boop-tilt-2');
         }, 600);
 
-        // After first click, reset if not clicked again within 2s
-        if (logoClicks === 1) {
-          leanInTimer = setTimeout(() => {
-            onCooldown = true;
-            cooldownTimer = setTimeout(resetLogoState, 800);
-          }, 2000);
-        }
+        // Reset if not clicked again within 2s (applies to both click 1 and 2)
+        leanInTimer = setTimeout(() => {
+          onCooldown = true;
+          cooldownTimer = setTimeout(resetLogoState, 800);
+        }, 2000);
       }
     });
   }
@@ -411,11 +409,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
           let started = false;
           const observer = new ResizeObserver(() => {
-            if (init() && !started) {
-              started = true;
-              window.matrixInterval = setInterval(draw, 50);
-              canvas.matrixInterval = window.matrixInterval;
+            if (!started) {
+              if (init()) {
+                started = true;
+                window.matrixInterval = setInterval(draw, 50);
+                canvas.matrixInterval = window.matrixInterval;
+              }
             }
+            // don't re-init on resize once running — avoids jarring canvas reset
           });
           observer.observe(canvas.parentElement);
           window.matrixObserver = observer;
@@ -427,6 +428,11 @@ document.addEventListener('DOMContentLoaded', () => {
         secretDesc.style.position = 'static';
         secretDesc.style.pointerEvents = 'auto';
         secretBtn.textContent = 'Top Secret';
+        // Stop matrix when hidden
+        if (window.matrixInterval) { clearInterval(window.matrixInterval); window.matrixInterval = null; }
+        if (window.matrixObserver) { window.matrixObserver.disconnect(); window.matrixObserver = null; }
+        const canvas = document.getElementById('matrix-canvas');
+        if (canvas) { canvas.matrixInterval = null; canvas.matrixObserver = null; }
       }
     });
   }
