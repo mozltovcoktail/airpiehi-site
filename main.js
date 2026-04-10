@@ -618,6 +618,73 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchend', endDrag);
   }
 
+  let partyRafId = null;
+
+  function triggerSecretMode() {
+    document.body.style.animation = "rainbowBg 5s infinite";
+
+    // Keep --bg-color in lockstep with the body's animated background so
+    // the eye lids (which use var(--bg-color)) always match the page color.
+    function syncPartyColor() {
+      const color = getComputedStyle(document.body).backgroundColor;
+      document.documentElement.style.setProperty('--bg-color', color);
+      partyRafId = requestAnimationFrame(syncPartyColor);
+    }
+    partyRafId = requestAnimationFrame(syncPartyColor);
+
+    const logo = document.querySelector('.floating-logo-container');
+    const tagline = document.querySelector('.hero-content p');
+    const sectionTitle = document.querySelector('.section-title');
+    const comingSoon = document.querySelector('.coming-soon');
+    const heart = document.getElementById('footer-heart');
+
+    if (logo) logo.classList.add('logo-party');
+    if (tagline) tagline.classList.add('hero-party');
+    if (sectionTitle) setTimeout(() => sectionTitle.classList.add('hero-party'), 100);
+    if (comingSoon) setTimeout(() => comingSoon.classList.add('hero-party'), 200);
+    if (heart) setTimeout(() => heart.classList.add('heart-party'), 300);
+    if (secretEye) {
+      clearTimeout(eyeTimer1);
+      clearTimeout(eyeTimer2);
+      setEyeState('excited');
+      secretEye.classList.add('party-eye');
+      setTimeout(() => setEyeState('awake'), 400);
+    }
+
+    const cards = document.querySelectorAll('.app-card');
+    cards.forEach((card, i) => {
+      setTimeout(() => card.classList.add('party-mode'), i * 150);
+    });
+
+    // Turn it off after 8 seconds — settle gracefully from mid-animation position
+    setTimeout(() => {
+      const settle = (el, partyClass) => {
+        if (!el) return;
+        const frozen = getComputedStyle(el).transform;
+        el.classList.remove(partyClass);
+        el.style.transform = frozen;
+        el.offsetHeight;
+        el.style.transition = 'transform 0.5s ease-out';
+        el.style.transform = '';
+        setTimeout(() => { el.style.transition = ''; }, 500);
+      };
+
+      settle(logo, 'logo-party');
+      settle(tagline, 'hero-party');
+      settle(sectionTitle, 'hero-party');
+      settle(comingSoon, 'hero-party');
+      settle(heart, 'heart-party');
+      cards.forEach(card => settle(card, 'party-mode'));
+      document.body.style.animation = "";
+      cancelAnimationFrame(partyRafId);
+      document.documentElement.style.removeProperty('--bg-color');
+      if (secretEye) {
+        secretEye.classList.remove('party-eye');
+        eyeToSleep();
+      }
+    }, 8000);
+  }
+
 });
 
 function triggerHeartRain() {
@@ -672,72 +739,6 @@ function triggerAirMode() {
   });
 }
 
-let partyRafId = null;
-
-function triggerSecretMode() {
-  document.body.style.animation = "rainbowBg 5s infinite";
-
-  // Keep --bg-color in lockstep with the body's animated background so
-  // the eye lids (which use var(--bg-color)) always match the page color.
-  function syncPartyColor() {
-    const color = getComputedStyle(document.body).backgroundColor;
-    document.documentElement.style.setProperty('--bg-color', color);
-    partyRafId = requestAnimationFrame(syncPartyColor);
-  }
-  partyRafId = requestAnimationFrame(syncPartyColor);
-
-  const logo = document.querySelector('.floating-logo-container');
-  const tagline = document.querySelector('.hero-content p');
-  const sectionTitle = document.querySelector('.section-title');
-  const comingSoon = document.querySelector('.coming-soon');
-  const heart = document.getElementById('footer-heart');
-
-  if (logo) logo.classList.add('logo-party');
-  if (tagline) tagline.classList.add('hero-party');
-  if (sectionTitle) setTimeout(() => sectionTitle.classList.add('hero-party'), 100);
-  if (comingSoon) setTimeout(() => comingSoon.classList.add('hero-party'), 200);
-  if (heart) setTimeout(() => heart.classList.add('heart-party'), 300);
-  if (secretEye) {
-    clearTimeout(eyeTimer1);
-    clearTimeout(eyeTimer2);
-    setEyeState('excited');
-    secretEye.classList.add('party-eye');
-    setTimeout(() => setEyeState('awake'), 400);
-  }
-
-  const cards = document.querySelectorAll('.app-card');
-  cards.forEach((card, i) => {
-    setTimeout(() => card.classList.add('party-mode'), i * 150);
-  });
-
-  // Turn it off after 8 seconds — settle gracefully from mid-animation position
-  setTimeout(() => {
-    const settle = (el, partyClass) => {
-      if (!el) return;
-      const frozen = getComputedStyle(el).transform;
-      el.classList.remove(partyClass);
-      el.style.transform = frozen;
-      el.offsetHeight;
-      el.style.transition = 'transform 0.5s ease-out';
-      el.style.transform = '';
-      setTimeout(() => { el.style.transition = ''; }, 500);
-    };
-
-    settle(logo, 'logo-party');
-    settle(tagline, 'hero-party');
-    settle(sectionTitle, 'hero-party');
-    settle(comingSoon, 'hero-party');
-    settle(heart, 'heart-party');
-    cards.forEach(card => settle(card, 'party-mode'));
-    document.body.style.animation = "";
-    cancelAnimationFrame(partyRafId);
-    document.documentElement.style.removeProperty('--bg-color');
-    if (secretEye) {
-      secretEye.classList.remove('party-eye');
-      eyeToSleep();
-    }
-  }, 8000);
-}
 
 function triggerPennyConfetti() {
   const logo = document.querySelector('.floating-logo');
