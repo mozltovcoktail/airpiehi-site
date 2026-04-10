@@ -718,9 +718,9 @@ document.addEventListener('DOMContentLoaded', () => {
           eyeTimer2 = setTimeout(() => {
             let blinksDone = 0;
             const TOTAL_BLINKS = 3;
-            const CLOSE_MS = 120;
-            const OPEN_MS = 150;
-            const PAUSE_MS = 500;
+            const CLOSE_MS = 250;
+            const OPEN_MS = 350;
+            const PAUSE_MS = 900;
 
             function doBlink() {
               topLid.style.transition = `transform ${CLOSE_MS}ms ease-in`;
