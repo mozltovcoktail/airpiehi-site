@@ -679,8 +679,45 @@ document.addEventListener('DOMContentLoaded', () => {
       cancelAnimationFrame(partyRafId);
       document.documentElement.style.removeProperty('--bg-color');
       if (secretEye) {
+        const topLid = secretEye.querySelector('.eye-lid-top');
+        const bottomLid = secretEye.querySelector('.eye-lid-bottom');
+        const ball = secretEye.querySelector('.eye-ball');
+
+        // Capture mid-animation state before removing party-eye
+        const frozenTop = getComputedStyle(topLid).transform;
+        const frozenBottom = getComputedStyle(bottomLid).transform;
+        const frozenBallBg = getComputedStyle(ball).backgroundColor;
+
         secretEye.classList.remove('party-eye');
-        eyeToSleep();
+        eyeToSleep(); // → restless state
+
+        // Freeze lids and eyeball at their animated positions
+        topLid.style.transform = frozenTop;
+        bottomLid.style.transform = frozenBottom;
+        bottomLid.style.opacity = '1';
+        ball.style.background = frozenBallBg;
+        ball.style.borderColor = frozenBallBg;
+        topLid.offsetHeight; // force reflow
+
+        // Slowly close lids to restless position; eyeball fades to white
+        topLid.style.transition = 'transform 1.2s ease-out';
+        bottomLid.style.transition = 'transform 1.2s ease-out';
+        ball.style.transition = 'background 1.2s ease-out, border-color 1.2s ease-out';
+        topLid.style.transform = 'translateY(-10px)';
+        bottomLid.style.transform = 'translateY(6px)';
+        ball.style.background = '#fff';
+        ball.style.borderColor = '#000';
+
+        setTimeout(() => {
+          topLid.style.transform = '';
+          topLid.style.transition = '';
+          bottomLid.style.transform = '';
+          bottomLid.style.transition = '';
+          bottomLid.style.opacity = '';
+          ball.style.background = '';
+          ball.style.borderColor = '';
+          ball.style.transition = '';
+        }, 1300);
       }
     }, 8000);
   }
