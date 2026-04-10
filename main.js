@@ -708,19 +708,20 @@ document.addEventListener('DOMContentLoaded', () => {
         ball.style.borderColor = '#ff0000';
         ball.style.transition = '';
 
-        // After 2s: fade eyeball to white
+        // After 2s: blink sequence begins; red fades to white during blinking
         eyeTimer1 = setTimeout(() => {
-          ball.style.transition = 'background 1.5s ease-out, border-color 1.5s ease-out';
-          ball.style.background = '#fff';
-          ball.style.borderColor = '#000';
-
-          // After fade settles: blink 3 times then sleep
           eyeTimer2 = setTimeout(() => {
             let blinksDone = 0;
             const TOTAL_BLINKS = 3;
             const CLOSE_MS = 250;
             const OPEN_MS = 350;
             const PAUSE_MS = 900;
+
+            // Fade red → white over the full blink sequence duration
+            const blinkDuration = (CLOSE_MS + OPEN_MS + PAUSE_MS) * (TOTAL_BLINKS - 1) + CLOSE_MS;
+            ball.style.transition = `background ${blinkDuration}ms ease-out, border-color ${blinkDuration}ms ease-out`;
+            ball.style.background = '#fff';
+            ball.style.borderColor = '#000';
 
             function doBlink() {
               topLid.style.transition = `transform ${CLOSE_MS}ms ease-in`;
@@ -754,8 +755,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             doBlink();
-          }, 2000); // wait for fade to finish + brief pause
-        }, 2000); // hold red for 2s
+          }, 0);
+        }, 2000); // hold red for 2s, then blink + fade together
       }
     }, 8000);
   }
