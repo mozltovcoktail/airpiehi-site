@@ -683,41 +683,79 @@ document.addEventListener('DOMContentLoaded', () => {
         const bottomLid = secretEye.querySelector('.eye-lid-bottom');
         const ball = secretEye.querySelector('.eye-ball');
 
-        // Capture mid-animation state before removing party-eye
+        // Freeze lids at mid-animation position
         const frozenTop = getComputedStyle(topLid).transform;
         const frozenBottom = getComputedStyle(bottomLid).transform;
-        const frozenBallBg = getComputedStyle(ball).backgroundColor;
 
         secretEye.classList.remove('party-eye');
-        eyeToSleep(); // → restless state
+        clearTimeout(eyeTimer1);
+        clearTimeout(eyeTimer2);
+        setEyeState('awake'); // keep eye open for the red phase
 
-        // Freeze lids and eyeball at their animated positions
         topLid.style.transform = frozenTop;
         bottomLid.style.transform = frozenBottom;
         bottomLid.style.opacity = '1';
-        ball.style.background = frozenBallBg;
-        ball.style.borderColor = frozenBallBg;
-        topLid.offsetHeight; // force reflow
+        topLid.offsetHeight; // reflow
 
-        // Slowly close lids to restless position; eyeball fades to white
-        topLid.style.transition = 'transform 1.2s ease-out';
-        bottomLid.style.transition = 'transform 1.2s ease-out';
-        ball.style.transition = 'background 1.2s ease-out, border-color 1.2s ease-out';
-        topLid.style.transform = 'translateY(-10px)';
-        bottomLid.style.transform = 'translateY(6px)';
-        ball.style.background = '#fff';
-        ball.style.borderColor = '#000';
+        // Glide lids to awake-open position
+        topLid.style.transition = 'transform 0.8s ease-out';
+        bottomLid.style.transition = 'transform 0.8s ease-out';
+        topLid.style.transform = 'translateY(-22px)';
+        bottomLid.style.transform = 'translateY(16px)';
 
-        setTimeout(() => {
-          topLid.style.transform = '';
-          topLid.style.transition = '';
-          bottomLid.style.transform = '';
-          bottomLid.style.transition = '';
-          bottomLid.style.opacity = '';
-          ball.style.background = '';
-          ball.style.borderColor = '';
-          ball.style.transition = '';
-        }, 1300);
+        // Eyeball settles on red
+        ball.style.background = '#d04e17';
+        ball.style.borderColor = '#d04e17';
+        ball.style.transition = '';
+
+        // After 2s: fade eyeball to white
+        eyeTimer1 = setTimeout(() => {
+          ball.style.transition = 'background 1.5s ease-out, border-color 1.5s ease-out';
+          ball.style.background = '#fff';
+          ball.style.borderColor = '#000';
+
+          // After fade settles: blink 3 times then sleep
+          eyeTimer2 = setTimeout(() => {
+            let blinksDone = 0;
+            const TOTAL_BLINKS = 3;
+            const CLOSE_MS = 120;
+            const OPEN_MS = 150;
+            const PAUSE_MS = 500;
+
+            function doBlink() {
+              topLid.style.transition = `transform ${CLOSE_MS}ms ease-in`;
+              bottomLid.style.transition = `transform ${CLOSE_MS}ms ease-in`;
+              topLid.style.transform = 'translateY(0)';
+              bottomLid.style.transform = 'translateY(0)';
+              blinksDone++;
+
+              if (blinksDone < TOTAL_BLINKS) {
+                eyeTimer1 = setTimeout(() => {
+                  topLid.style.transition = `transform ${OPEN_MS}ms ease-out`;
+                  bottomLid.style.transition = `transform ${OPEN_MS}ms ease-out`;
+                  topLid.style.transform = 'translateY(-22px)';
+                  bottomLid.style.transform = 'translateY(16px)';
+                  eyeTimer2 = setTimeout(doBlink, OPEN_MS + PAUSE_MS);
+                }, CLOSE_MS);
+              } else {
+                // Final blink — stay closed, clean up, sleep
+                eyeTimer1 = setTimeout(() => {
+                  topLid.style.transform = '';
+                  topLid.style.transition = '';
+                  bottomLid.style.transform = '';
+                  bottomLid.style.transition = '';
+                  bottomLid.style.opacity = '';
+                  ball.style.background = '';
+                  ball.style.borderColor = '';
+                  ball.style.transition = '';
+                  setEyeState(null);
+                }, CLOSE_MS + 100);
+              }
+            }
+
+            doBlink();
+          }, 2000); // wait for fade to finish + brief pause
+        }, 2000); // hold red for 2s
       }
     }, 8000);
   }
