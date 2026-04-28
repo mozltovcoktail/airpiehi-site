@@ -45,6 +45,8 @@ body.upside-down {
 #app {
   position: relative;
   z-index: 1;
+  container-type: inline-size;
+  container-name: app;
 }
 
 main {
@@ -87,8 +89,8 @@ main {
 }
 
 .floating-logo {
-  width: clamp(160px, 40vw, 280px);
-  height: clamp(160px, 40vw, 280px);
+  width: clamp(160px, 40cqi, 280px);
+  height: clamp(160px, 40cqi, 280px);
   object-fit: cover;
   display: block;
   border-radius: var(--border-radius-lg);
@@ -287,7 +289,7 @@ body.spin-page {
 }
 
 .hero-content h1 {
-  font-size: clamp(3rem, 12vw, 5.5rem);
+  font-size: clamp(3rem, 12cqi, 5.5rem);
   font-weight: 900;
   letter-spacing: -2px;
   margin-bottom: 1rem;
@@ -347,7 +349,7 @@ body.spin-page {
 }
 
 .hero-content p {
-  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-size: clamp(1rem, 4cqi, 1.5rem);
   font-weight: 800;
   max-width: 600px;
   margin: 0 auto;
@@ -356,7 +358,7 @@ body.spin-page {
   background: var(--panel-bg);
   border: var(--panel-border);
   border-radius: var(--border-radius-lg);
-  padding: clamp(1rem, 3vw, 1.5rem) clamp(1.25rem, 4vw, 2rem);
+  padding: clamp(1rem, 3cqi, 1.5rem) clamp(1.25rem, 4cqi, 2rem);
   box-shadow: var(--panel-shadow);
   position: relative;
   z-index: 2;
@@ -369,7 +371,7 @@ body.spin-page {
 }
 
 .section-title {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-size: clamp(1.75rem, 5cqi, 2.5rem);
   font-weight: 900;
   margin-bottom: 3rem;
   text-align: center;
@@ -565,7 +567,7 @@ body.spin-page {
 }
 
 .app-card h3 {
-  font-size: clamp(1.5rem, 5.5vw, 2.5rem);
+  font-size: clamp(1.5rem, 5.5cqi, 2.5rem);
   font-weight: 900;
   margin-bottom: 1rem;
   letter-spacing: -1px;
@@ -591,7 +593,7 @@ body.spin-page {
 
 .app-card p {
   line-height: 1.6;
-  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  font-size: clamp(1rem, 3.5cqi, 1.25rem);
   color: #000000;
   font-weight: 700;
   margin-bottom: 2.5rem;
@@ -689,7 +691,7 @@ body.spin-page {
 }
 
 .coming-soon h2 {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-size: clamp(1.75rem, 5cqi, 2.5rem);
   font-weight: 900;
   margin-bottom: 1rem;
   letter-spacing: -0.5px;
@@ -717,7 +719,7 @@ body.spin-page {
   user-select: none;
 }
 
-@media (max-width: 480px) {
+@container app (max-width: 480px) {
   #secret-eye {
     left: 0.5rem;
     transform: translateY(-50%) scale(0.8);
@@ -921,14 +923,14 @@ footer {
   box-shadow: 1px 1px 0px #000;
 }
 
-@media (max-width: 500px) {
+@container app (max-width: 500px) {
   footer {
     flex-direction: column;
     text-align: center;
   }
 }
 
-@media (max-width: 768px) {
+@container app (max-width: 768px) {
   main { padding: 3rem 1rem; gap: 3rem; }
   .hero { min-height: 30vh; }
   .project-cards { grid-template-columns: 1fr; }
