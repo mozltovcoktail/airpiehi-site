@@ -193,22 +193,21 @@ document.addEventListener('DOMContentLoaded', () => {
       letter.classList.add('boop');
       setTimeout(() => letter.classList.remove('boop'), 400);
 
-      // Record letter click
+      // Record letter click (keep last 3)
       clickHistory.push(letter.textContent.toLowerCase());
-      if (clickHistory.length > 5) clickHistory.shift();
+      if (clickHistory.length > 3) clickHistory.shift();
 
-      // Check if they spelled 'pie'
-      if (clickHistory.slice(-3).join('') === 'pie') {
-        triggerSecretMode();
-        markSecret('pie');
-        clickHistory = [];
-      }
-
-      // Check if they spelled 'air'
-      if (clickHistory.slice(-3).join('') === 'air') {
-        triggerAirMode();
-        markSecret('air');
-        clickHistory = [];
+      if (clickHistory.length === 3) {
+        const sorted = [...clickHistory].sort().join('');
+        if (sorted === 'eip') {
+          triggerAirMode();
+          markSecret('pie');
+          clickHistory = [];
+        } else if (sorted === 'air') {
+          triggerAirMode();
+          markSecret('air');
+          clickHistory = [];
+        }
       }
     });
   });
@@ -725,10 +724,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.style.borderColor = '#000';
 
             function doBlink() {
+              const isFinal = blinksDone === TOTAL_BLINKS - 1;
               topLid.style.transition = `transform ${CLOSE_MS}ms ease-in`;
               bottomLid.style.transition = `transform ${CLOSE_MS}ms ease-in`;
               topLid.style.transform = 'translateY(0)';
               bottomLid.style.transform = 'translateY(0)';
+              if (isFinal) {
+                ball.style.transition = `transform ${CLOSE_MS}ms ease-in, background 0ms, border-color 0ms`;
+                ball.style.transform = 'scale(0)';
+              }
               blinksDone++;
 
               if (blinksDone < TOTAL_BLINKS) {
@@ -750,6 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   ball.style.background = '';
                   ball.style.borderColor = '';
                   ball.style.transition = '';
+                  ball.style.transform = '';
                   setEyeState(null);
                 }, CLOSE_MS + 100);
               }
@@ -1030,16 +1035,18 @@ function triggerPennyConfetti() {
     const t = e.touches[0];
     lastAngle = angleTo(t.clientX, t.clientY);
     playdateCard.classList.add('cranking');
-    e.stopPropagation();
-  }, { passive: true });
+    e.preventDefault(); // block scroll from initiating on crank grab
+  }, { passive: false });
 
   document.addEventListener('mousemove', (e) => {
     if (cranking) onMove(e.clientX, e.clientY);
   });
 
   document.addEventListener('touchmove', (e) => {
-    if (cranking) onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
+    if (!cranking) return;
+    e.preventDefault(); // block page scroll while cranking
+    onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
 
   document.addEventListener('mouseup', () => {
     if (cranking) {

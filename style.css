@@ -924,6 +924,19 @@ footer {
 @media (max-width: 768px) {
   main { padding: 3rem 1rem; gap: 3rem; }
   .hero-content h1 { font-size: 4rem; }
+  .hero-content p { font-size: 1.25rem; padding: 1.25rem 1.5rem; }
   .floating-logo { width: 220px; height: 220px; }
   .project-cards { grid-template-columns: 1fr; }
+  .app-card { padding: 1.5rem; }
+  .app-card.neutralize-playdate .card-content { padding-right: 3.5rem; }
+  .playdate-crank { right: 1.5rem; top: 1.5rem; }
+}
+
+/* Expand crank touch target on touch devices */
+@media (pointer: coarse) {
+  .playdate-crank::before {
+    content: '';
+    position: absolute;
+    inset: -16px;
+  }
 }
