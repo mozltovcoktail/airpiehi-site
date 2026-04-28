@@ -87,8 +87,8 @@ main {
 }
 
 .floating-logo {
-  width: 280px;
-  height: 280px;
+  width: clamp(160px, 40vw, 280px);
+  height: clamp(160px, 40vw, 280px);
   object-fit: cover;
   display: block;
   border-radius: var(--border-radius-lg);
@@ -287,7 +287,7 @@ body.spin-page {
 }
 
 .hero-content h1 {
-  font-size: 5.5rem;
+  font-size: clamp(3rem, 12vw, 5.5rem);
   font-weight: 900;
   letter-spacing: -2px;
   margin-bottom: 1rem;
@@ -347,7 +347,7 @@ body.spin-page {
 }
 
 .hero-content p {
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 4vw, 1.5rem);
   font-weight: 800;
   max-width: 600px;
   margin: 0 auto;
@@ -356,7 +356,7 @@ body.spin-page {
   background: var(--panel-bg);
   border: var(--panel-border);
   border-radius: var(--border-radius-lg);
-  padding: 1.5rem 2rem;
+  padding: clamp(1rem, 3vw, 1.5rem) clamp(1.25rem, 4vw, 2rem);
   box-shadow: var(--panel-shadow);
   position: relative;
   z-index: 2;
@@ -369,7 +369,7 @@ body.spin-page {
 }
 
 .section-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 900;
   margin-bottom: 3rem;
   text-align: center;
@@ -565,7 +565,7 @@ body.spin-page {
 }
 
 .app-card h3 {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 5.5vw, 2.5rem);
   font-weight: 900;
   margin-bottom: 1rem;
   letter-spacing: -1px;
@@ -591,7 +591,7 @@ body.spin-page {
 
 .app-card p {
   line-height: 1.6;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
   color: #000000;
   font-weight: 700;
   margin-bottom: 2.5rem;
@@ -689,7 +689,7 @@ body.spin-page {
 }
 
 .coming-soon h2 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 900;
   margin-bottom: 1rem;
   letter-spacing: -0.5px;
@@ -703,19 +703,26 @@ body.spin-page {
   font-weight: 800;
 }
 
-/* Secret Eye — sticky upper-left, draws behind panels */
+/* Secret Eye — fixed left-center, draws behind panels */
 #secret-eye {
-  position: sticky;
-  top: calc(50vh - 15px);
+  position: fixed;
+  top: 50%;
+  left: 1.5rem;
+  transform: translateY(-50%);
   width: 60px;
   height: 30px;
   z-index: 1;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  margin-left: 2rem;
-  margin-bottom: -30px;
-  float: left;
+}
+
+@media (max-width: 480px) {
+  #secret-eye {
+    left: 0.5rem;
+    transform: translateY(-50%) scale(0.8);
+    transform-origin: left center;
+  }
 }
 
 .eye-ball {
@@ -923,9 +930,7 @@ footer {
 
 @media (max-width: 768px) {
   main { padding: 3rem 1rem; gap: 3rem; }
-  .hero-content h1 { font-size: 4rem; }
-  .hero-content p { font-size: 1.25rem; padding: 1.25rem 1.5rem; }
-  .floating-logo { width: 220px; height: 220px; }
+  .hero { min-height: 30vh; }
   .project-cards { grid-template-columns: 1fr; }
   .app-card { padding: 1.5rem; }
   .app-card.neutralize-playdate .card-content { padding-right: 3.5rem; }

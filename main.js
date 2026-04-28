@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (clickHistory.length === 3) {
         const sorted = [...clickHistory].sort().join('');
         if (sorted === 'eip') {
-          triggerAirMode();
+          triggerSecretMode();
           markSecret('pie');
           clickHistory = [];
         } else if (sorted === 'air') {
