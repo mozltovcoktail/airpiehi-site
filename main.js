@@ -162,79 +162,76 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. Secret "PIE" puzzle
-  let clickHistory = [];
-  
-  letters.forEach((letter) => {
-    // Track hover via class so it persists through boop animation
-    // (CSS :hover won't re-evaluate without real mouse movement)
-    letter.addEventListener('mouseenter', () => {
-      letter.classList.add('letter-hover');
-    });
-    letter.addEventListener('mouseleave', () => {
-      letter.classList.remove('letter-hover');
-    });
-    // On touch devices, clear hover so it doesn't stick
-    letter.addEventListener('touchstart', () => {
-      letter.classList.remove('letter-hover');
-    }, { passive: true });
-    letter.addEventListener('touchend', () => {
-      setTimeout(() => letter.classList.remove('letter-hover'), 400);
-    });
+  // 2. Word-based hover ripple + tap boop + click secrets
+  const airLetters = letters.slice(0, 3);
+  const pieLetters = letters.slice(3, 6);
 
-    // Safety net: clear hover if pointer leaves letter bounds
-    // (mouseleave can miss when transform shifts the element)
-    letter.addEventListener('pointerleave', () => {
-      letter.classList.remove('letter-hover');
-    });
+  const wordGroups = [
+    { letters: airLetters, secretFn: () => { triggerAirMode(); markSecret('air'); } },
+    { letters: pieLetters, secretFn: () => { triggerSecretMode(); markSecret('pie'); } },
+  ];
 
-    letter.addEventListener('click', () => {
-      // Juicy animation
-      letter.classList.add('boop');
-      setTimeout(() => letter.classList.remove('boop'), 400);
+  const wordHovered = [false, false];
+  const wordClickCounts = [0, 0];
+  const wordClickTimers = [null, null];
+  const wordRippleTimers = [[], []];
 
-      // Record letter click (keep last 3)
-      clickHistory.push(letter.textContent.toLowerCase());
-      if (clickHistory.length > 3) clickHistory.shift();
-
-      if (clickHistory.length === 3) {
-        const sorted = [...clickHistory].sort().join('');
-        if (sorted === 'eip') {
-          triggerSecretMode();
-          markSecret('pie');
-          clickHistory = [];
-        } else if (sorted === 'air') {
-          triggerAirMode();
-          markSecret('air');
-          clickHistory = [];
-        }
-      }
-    });
-  });
-
-  // mousemove arbitrator: uses elementFromPoint (transform-aware) to determine
-  // which letter is visually under the cursor and force-switches hover state.
-  // Fixes the case where a lifted/scaled letter's hit area overlaps the next
-  // letter, preventing its mouseenter from ever firing.
-  if (letters.length) {
-    document.addEventListener('mousemove', (e) => {
-      const under = document.elementFromPoint(e.clientX, e.clientY);
-      if (under && under.classList.contains('letter')) {
-        // Correct letter is under cursor — clear all others, ensure this one is set
-        letters.forEach(l => { if (l !== under) l.classList.remove('letter-hover'); });
-        under.classList.add('letter-hover');
-      } else {
-        // Not over any letter — clear any stale hover outside a small buffer
-        document.querySelectorAll('.letter.letter-hover').forEach(el => {
-          const r = el.getBoundingClientRect();
-          if (e.clientX < r.left - 4 || e.clientX > r.right + 4 ||
-              e.clientY < r.top  - 4 || e.clientY > r.bottom + 4) {
-            el.classList.remove('letter-hover');
-          }
-        });
-      }
+  function rippleWord(wordLetters, inward, gi) {
+    wordRippleTimers[gi].forEach(t => clearTimeout(t));
+    wordRippleTimers[gi] = [];
+    wordLetters.forEach((letter, i) => {
+      const t = setTimeout(() => {
+        if (inward) letter.classList.add('letter-hover');
+        else letter.classList.remove('letter-hover');
+      }, i * 80);
+      wordRippleTimers[gi].push(t);
     });
   }
+
+  function boopWord(wordLetters, fromHover) {
+    const fromTransform = fromHover ? 'translate(-4px, -6px) scale(1.1)' : 'translate(0, 0) scale(1)';
+    const fromShadow = fromHover ? '8px 10px 0px #000000' : '4px 4px 0px #000000';
+    wordLetters.forEach((letter, i) => {
+      setTimeout(() => {
+        letter.animate([
+          { transform: fromTransform, textShadow: fromShadow },
+          { transform: 'translate(-4px, -22px) scale(1.35)', textShadow: '8px 26px 0px #000000', offset: 0.4 },
+          { transform: fromTransform, textShadow: fromShadow },
+        ], { duration: 550, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+      }, i * 80);
+    });
+  }
+
+  wordGroups.forEach((group, gi) => {
+    group.letters.forEach((letter) => {
+      letter.addEventListener('mouseenter', () => {
+        if (!wordHovered[gi]) {
+          wordHovered[gi] = true;
+          rippleWord(group.letters, true, gi);
+        }
+      });
+
+      letter.addEventListener('mouseleave', (e) => {
+        if (!group.letters.includes(e.relatedTarget)) {
+          wordHovered[gi] = false;
+          rippleWord(group.letters, false, gi);
+        }
+      });
+
+      letter.addEventListener('click', () => {
+        boopWord(group.letters, wordHovered[gi]);
+
+        wordClickCounts[gi]++;
+        clearTimeout(wordClickTimers[gi]);
+        if (wordClickCounts[gi] >= 3) {
+          wordClickCounts[gi] = 0;
+          group.secretFn();
+        } else {
+          wordClickTimers[gi] = setTimeout(() => { wordClickCounts[gi] = 0; }, 2000);
+        }
+      });
+    });
+  });
 
   // 3. Logo spin code + letter spin secret
   const logo = document.querySelector('.floating-logo-container');
@@ -808,16 +805,46 @@ function triggerHeartRain() {
 }
 
 function triggerAirMode() {
-  const allLetters = document.querySelectorAll('.hero-content h1 .letter');
+  const allLetters = [...document.querySelectorAll('.hero-content h1 .letter')];
+  const n = allLetters.length;
+  const STAGGER = 80;
+  const FLY_UP = 680;
+  const HOLD = 180;
+  const FLY_DOWN = 620;
+
+  const params = allLetters.map(() => ({
+    x: (Math.random() - 0.5) * 900,
+    rot: (Math.random() - 0.5) * 60,
+  }));
+
+  // Phase 1: fly out A I R P I E
   allLetters.forEach((l, i) => {
-    const xRange = (Math.random() - 0.5) * 900;
-    const rot = (Math.random() - 0.5) * 60;
-    l.style.setProperty('--air-x', `${xRange}px`);
-    l.style.setProperty('--air-rot', `${rot}deg`);
+    const { x, rot } = params[i];
     setTimeout(() => {
-      l.classList.add('air-scatter');
-      setTimeout(() => l.classList.remove('air-scatter'), 1600);
-    }, i * 60);
+      l.animate([
+        { transform: 'translate(0, 0) rotate(0deg)' },
+        { transform: `translate(${x}px, -260px) rotate(${rot}deg)` },
+      ], { duration: FLY_UP, easing: 'cubic-bezier(0.25, 0, 0.5, 1)', fill: 'forwards' });
+    }, i * STAGGER);
+  });
+
+  // Phase 2: fly back E I P R I A (reverse order)
+  const returnStart = (n - 1) * STAGGER + FLY_UP + HOLD;
+  allLetters.forEach((l, i) => {
+    const { x, rot } = params[i];
+    const delay = returnStart + (n - 1 - i) * STAGGER;
+    setTimeout(() => {
+      const anim = l.animate([
+        { transform: `translate(${x}px, -260px) rotate(${rot}deg)` },
+        { transform: 'translate(0, 0) rotate(0deg)' },
+      ], { duration: FLY_DOWN, easing: 'cubic-bezier(0.25, 0.75, 0.5, 1)', fill: 'forwards' });
+      // A (i=0) finishes last — clean up all animations after it lands
+      if (i === 0) {
+        anim.onfinish = () => {
+          allLetters.forEach(l => l.getAnimations().forEach(a => a.cancel()));
+        };
+      }
+    }, delay);
   });
 }
 
