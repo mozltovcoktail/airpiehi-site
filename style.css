@@ -411,6 +411,11 @@ body.spin-page {
   padding-right: 5rem;
 }
 
+.app-card.neutralize-playdate .app-links {
+  /* Button spans full width — crank only overlaps the text above */
+  margin-right: -5rem;
+}
+
 /* itch.io button — Playdate yellow */
 .primary-link.playdate-itch-btn {
   background: #FFC500;
@@ -926,6 +931,7 @@ footer {
   .project-cards { grid-template-columns: 1fr; }
   .app-card { padding: 1.5rem; }
   .app-card.neutralize-playdate .card-content { padding-right: 3.5rem; }
+  .app-card.neutralize-playdate .app-links { margin-right: -3.5rem; }
   .playdate-crank { right: 1.5rem; top: 1.5rem; }
 }
 

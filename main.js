@@ -499,6 +499,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let footerDragStartY = 0;
   const belowFold = document.getElementById('below-the-fold');
   let bounceTimeout = null;
+  let lastScrollTime = 0;
+  // Touch-specific state
+  let footerTouchPending = false;   // touch started on footer but not yet committed to drag
+  let footerTouchPendingY = 0;
 
   function showBelowFold(amount) {
     if (!belowFold) return;
@@ -529,8 +533,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // Hide immediately if user scrolls back up
+  // Hide immediately if user scrolls back up; track scroll time for touch guard
   window.addEventListener('scroll', () => {
+    lastScrollTime = Date.now();
     const scrollMaxY = document.documentElement.scrollHeight - window.innerHeight;
     if (window.scrollY < scrollMaxY - 2) {
       wheelAccum = 0;
@@ -538,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hideBelowFold();
     }
   }, { passive: true });
+
 
 
   if (footer) {
@@ -609,10 +615,43 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('mouseup', endDrag);
     window.addEventListener('mouseleave', endDrag);
 
-    // Touch support
-    footer.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientY), {passive: true});
-    window.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientY), {passive: true});
-    window.addEventListener('touchend', endDrag);
+    // Touch support — require intentional footer drag, not scroll momentum
+    footer.addEventListener('touchstart', (e) => {
+      // Don't start a footer drag if the page was scrolling in the last 250ms
+      if (Date.now() - lastScrollTime > 250) {
+        footerTouchPending = true;
+        footerTouchPendingY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      const y = e.touches[0].clientY;
+
+      if (isDraggingFooter) {
+        moveDrag(y);
+        return;
+      }
+
+      if (footerTouchPending) {
+        const delta = footerTouchPendingY - y; // positive = finger moved up
+        if (delta > 8) {
+          // Committed: intentional upward pull on the footer
+          startDrag(footerTouchPendingY);
+          footerTouchPending = false;
+        } else if (delta < -5) {
+          // Downward movement = scroll, not a footer drag
+          footerTouchPending = false;
+        }
+        return;
+      }
+    }, { passive: true });
+
+    const endTouch = () => {
+      footerTouchPending = false;
+      endDrag();
+    };
+    window.addEventListener('touchend', endTouch);
+    window.addEventListener('touchcancel', endTouch);
   }
 
   let partyRafId = null;
