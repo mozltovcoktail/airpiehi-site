@@ -176,6 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const wordClickTimers = [null, null];
   const wordRippleTimers = [[], []];
 
+  // Block synthetic mouseenter events that mobile browsers fire on tap —
+  // they never get a matching mouseleave, which would leave hover classes stuck.
+  let touchActive = false;
+  document.addEventListener('touchstart', () => { touchActive = true; }, { passive: true });
+  document.addEventListener('touchend', () => { setTimeout(() => { touchActive = false; }, 500); }, { passive: true });
+
   function rippleWord(wordLetters, inward, gi) {
     wordRippleTimers[gi].forEach(t => clearTimeout(t));
     wordRippleTimers[gi] = [];
@@ -205,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wordGroups.forEach((group, gi) => {
     group.letters.forEach((letter) => {
       letter.addEventListener('mouseenter', () => {
+        if (touchActive) return;
         if (!wordHovered[gi]) {
           wordHovered[gi] = true;
           rippleWord(group.letters, true, gi);
@@ -499,10 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let footerDragStartY = 0;
   const belowFold = document.getElementById('below-the-fold');
   let bounceTimeout = null;
-  let lastScrollTime = 0;
-  // Touch-specific state
-  let footerTouchPending = false;   // touch started on footer but not yet committed to drag
-  let footerTouchPendingY = 0;
 
   function showBelowFold(amount) {
     if (!belowFold) return;
@@ -533,9 +536,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // Hide immediately if user scrolls back up; track scroll time for touch guard
+  // Hide immediately if user scrolls back up
   window.addEventListener('scroll', () => {
-    lastScrollTime = Date.now();
     const scrollMaxY = document.documentElement.scrollHeight - window.innerHeight;
     if (window.scrollY < scrollMaxY - 2) {
       wheelAccum = 0;
@@ -543,7 +545,6 @@ document.addEventListener('DOMContentLoaded', () => {
       hideBelowFold();
     }
   }, { passive: true });
-
 
 
   if (footer) {
@@ -615,43 +616,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('mouseup', endDrag);
     window.addEventListener('mouseleave', endDrag);
 
-    // Touch support — require intentional footer drag, not scroll momentum
-    footer.addEventListener('touchstart', (e) => {
-      // Don't start a footer drag if the page was scrolling in the last 250ms
-      if (Date.now() - lastScrollTime > 250) {
-        footerTouchPending = true;
-        footerTouchPendingY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      const y = e.touches[0].clientY;
-
-      if (isDraggingFooter) {
-        moveDrag(y);
-        return;
-      }
-
-      if (footerTouchPending) {
-        const delta = footerTouchPendingY - y; // positive = finger moved up
-        if (delta > 8) {
-          // Committed: intentional upward pull on the footer
-          startDrag(footerTouchPendingY);
-          footerTouchPending = false;
-        } else if (delta < -5) {
-          // Downward movement = scroll, not a footer drag
-          footerTouchPending = false;
-        }
-        return;
-      }
-    }, { passive: true });
-
-    const endTouch = () => {
-      footerTouchPending = false;
-      endDrag();
-    };
-    window.addEventListener('touchend', endTouch);
-    window.addEventListener('touchcancel', endTouch);
+    // Touch support
+    footer.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientY), {passive: true});
+    window.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientY), {passive: true});
+    window.addEventListener('touchend', endDrag);
   }
 
   let partyRafId = null;
@@ -873,18 +841,22 @@ function triggerAirMode() {
     const { x, rot } = params[i];
     const delay = returnStart + (n - 1 - i) * STAGGER;
     setTimeout(() => {
-      const anim = l.animate([
+      l.animate([
         { transform: `translate(${x}px, -260px) rotate(${rot}deg)` },
         { transform: 'translate(0, 0) rotate(0deg)' },
       ], { duration: FLY_DOWN, easing: 'cubic-bezier(0.25, 0.75, 0.5, 1)', fill: 'forwards' });
-      // A (i=0) finishes last — clean up all animations after it lands
-      if (i === 0) {
-        anim.onfinish = () => {
-          allLetters.forEach(l => l.getAnimations().forEach(a => a.cancel()));
-        };
-      }
     }, delay);
   });
+
+  // Use setTimeout rather than onfinish — more reliable on mobile where onfinish
+  // can be silently dropped. Also clears letter-hover which touch taps can leave behind.
+  const cleanupAt = returnStart + (n - 1) * STAGGER + FLY_DOWN + 80;
+  setTimeout(() => {
+    allLetters.forEach(l => {
+      l.getAnimations().forEach(a => a.cancel());
+      l.classList.remove('letter-hover');
+    });
+  }, cleanupAt);
 }
 
 
