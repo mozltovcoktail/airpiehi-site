@@ -1098,3 +1098,126 @@ function triggerPennyConfetti() {
     playdateCard.classList.remove('cranking');
   });
 })();
+
+// Cammy Whammy thumbnail rotator — pulls live YouTube IDs from the Cammy Whammy
+// Google Sheet and crossfades thumbnails on the homepage card.
+(() => {
+  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQDXUQBBe9MTSEnaR3lwbj2sJW3j4xnhHe6fLQlN95MJyeAsy3qGFkbopTN9asye40weuawqnNUa9u2/pub?output=csv';
+  const ROTATE_MS = 4500;
+  const YT_ID_RE = /^[A-Za-z0-9_-]{11}$/;
+
+  const thumb = document.querySelector('.cammy-thumb');
+  if (!thumb) return;
+  const imgA = thumb.querySelector('.cammy-thumb-a');
+  const imgB = thumb.querySelector('.cammy-thumb-b');
+  if (!imgA || !imgB) return;
+
+  function parseCsv(text) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(field); field = ''; }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else if (c === '\r') { /* skip */ }
+        else field += c;
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function extractYouTubeIds(csvText) {
+    const rows = parseCsv(csvText);
+    if (!rows.length) return [];
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const iType = header.indexOf('type');
+    const iStream = header.indexOf('streamtype');
+    const iId = header.indexOf('id');
+    if (iType < 0 || iId < 0) return [];
+    const ids = [];
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      if ((row[iType] || '').trim().toLowerCase() !== 'cam') continue;
+      const stream = ((iStream >= 0 ? row[iStream] : '') || '').trim().toLowerCase();
+      if (stream && stream !== 'youtube') continue;
+      let id = (row[iId] || '').trim();
+      const m = id.match(/[?&]v=([A-Za-z0-9_-]{11})/) || id.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+      if (m) id = m[1];
+      if (YT_ID_RE.test(id)) ids.push(id);
+    }
+    return ids;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function thumbUrl(id) {
+    return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = reject;
+      im.src = src;
+    });
+  }
+
+  async function start(ids) {
+    if (!ids.length) return;
+    let cursor = 0;
+    let showA = true;
+    // Prime first frame
+    try {
+      await loadImage(thumbUrl(ids[0]));
+      imgA.src = thumbUrl(ids[0]);
+      imgA.classList.add('is-active');
+      thumb.classList.add('has-image');
+    } catch { return; }
+    cursor = 1;
+    setInterval(async () => {
+      if (document.hidden) return;
+      // Find next valid image
+      let attempts = 0;
+      while (attempts < ids.length) {
+        const id = ids[cursor % ids.length];
+        cursor++;
+        attempts++;
+        try {
+          await loadImage(thumbUrl(id));
+          const incoming = showA ? imgB : imgA;
+          const outgoing = showA ? imgA : imgB;
+          incoming.src = thumbUrl(id);
+          incoming.classList.add('is-active');
+          outgoing.classList.remove('is-active');
+          showA = !showA;
+          return;
+        } catch { /* try next */ }
+      }
+    }, ROTATE_MS);
+  }
+
+  fetch(SHEET_URL)
+    .then(r => r.ok ? r.text() : Promise.reject(r.status))
+    .then(text => {
+      const ids = shuffle(extractYouTubeIds(text));
+      start(ids);
+    })
+    .catch(err => {
+      console.warn('[cammy] could not load thumbnails — using fallback gradient', err);
+    });
+})();
