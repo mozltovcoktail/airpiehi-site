@@ -1,0 +1,156 @@
+:root {
+  --bg: #ece4d2;
+  --ink: #1a1612;
+  --ink-soft: #2a241e;
+  --fade: 900ms;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color var(--fade) linear, color var(--fade) linear;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#stage {
+  max-width: 36rem;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(2rem, 8vh, 6rem) clamp(1.5rem, 5vw, 2.5rem);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: clamp(2.5rem, 8vh, 5rem);
+}
+
+/* AI utterance — the question */
+.ai {
+  align-self: center;
+  font-family: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  min-height: 1.25em;
+}
+
+.ai p {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 1100ms ease, transform 1100ms ease;
+}
+
+.ai p.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Options — your choices */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+.option {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-top: 1px solid currentColor;
+  color: inherit;
+  font: inherit;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(0.95rem, 2.6vw, 1.05rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-align: left;
+  padding: 1rem 0 0.25rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 700ms ease, transform 700ms ease, color 200ms ease;
+  width: 100%;
+  display: block;
+}
+
+.option.in {
+  opacity: 0.78;
+  transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .option:hover {
+    opacity: 1;
+  }
+}
+
+.option:active {
+  opacity: 1;
+}
+
+.option:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.option.fading-out {
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+
+/* Terminal landing — the closer */
+body.terminal .options {
+  display: none;
+}
+
+.ai.terminal {
+  font-style: italic;
+}
+
+/* Restart link appears on terminal */
+.restart {
+  align-self: end;
+  justify-self: start;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: inherit;
+  opacity: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: 2rem;
+  transition: opacity 800ms ease 1500ms;
+}
+
+.restart.in { opacity: 0.5; }
+.restart:hover { opacity: 0.85; }
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  body { transition: background-color 200ms linear, color 200ms linear; }
+  .ai p, .option, .restart {
+    transition-duration: 200ms !important;
+  }
+}
