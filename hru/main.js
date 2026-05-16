@@ -1,4 +1,4 @@
-import { sessions } from './sessions.js';
+import { session } from './sessions.js';
 
 const stage = document.getElementById('stage');
 const aiEl = document.getElementById('ai');
@@ -27,9 +27,9 @@ function applyShade(progress) {
   document.body.style.color = rgb(ink);
 }
 
-// Path-length estimate for the active session. Used to scale background shift.
-// Computed as the longest path from start to any terminal node.
-function maxDepth(session) {
+// Longest path from a given start node to any terminal. Used to scale the
+// background shift so the descent feels right regardless of which opener fires.
+function maxDepth(session, startId) {
   const seen = new Map();
   function walk(id) {
     if (seen.has(id)) return seen.get(id);
@@ -43,7 +43,7 @@ function maxDepth(session) {
     seen.set(id, best);
     return best;
   }
-  return walk(session.start);
+  return walk(startId);
 }
 
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -104,8 +104,8 @@ async function renderNode(session, nodeId, depth, totalDepth) {
   });
 }
 
-function pickSession() {
-  return sessions[Math.floor(Math.random() * sessions.length)];
+function pickStart() {
+  return session.starts[Math.floor(Math.random() * session.starts.length)];
 }
 
 function start() {
@@ -113,9 +113,9 @@ function start() {
   aiEl.classList.remove('terminal');
   optionsEl.innerHTML = '';
   aiEl.innerHTML = '';
-  const session = pickSession();
-  const total = maxDepth(session);
-  renderNode(session, session.start, 0, total);
+  const startId = pickStart();
+  const total = maxDepth(session, startId);
+  renderNode(session, startId, 0, total);
 }
 
 start();

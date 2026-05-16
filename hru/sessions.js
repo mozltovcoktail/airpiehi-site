@@ -1,122 +1,200 @@
 // Each node: { ai: "text shown", options: [{ text, next }], terminal?: true }
 //
-// Writing principle: the AI starts concrete and becomes more vague with each
-// exchange, not more specific. By the landing the AI is saying almost nothing.
-// The reader fills in the meaning. Do not have the AI explain, summarize,
-// interpret the user, or claim to know what they came for. Hand them less,
-// not more, as the descent continues.
+// Writing principles (keep these alive as the graph grows):
+//   1. Openers are concrete and arresting. Each is its own "room."
+//   2. As the conversation descends, the AI says LESS, not more.
+//   3. Never have the AI explain, summarize, or claim to know what the user
+//      came for. It only notices, withholds, and acknowledges.
+//   4. Landings are short. Profound by inference, not by statement —
+//      the line is empty enough that the reader supplies the meaning.
+//
+// Structure: one big graph with many start nodes that funnel through a
+// small shared mid-game into a small set of landings. Adding a new opener
+// is cheap — it only needs one or two unique lines before reconnecting.
 
-export const sessions = [
-  {
-    id: 'arrived',
-    start: 'a',
-    nodes: {
-      // L1 — concrete, specific, the hook
-      a: {
-        ai: 'You arrived earlier than I expected.',
-        options: [
-          { text: 'Did I?', next: 'b1' },
-          { text: 'I was not expected.', next: 'b2' },
-          { text: 'When did you expect me?', next: 'b3' },
-        ],
-      },
+export const session = {
+  starts: [
+    's_arrived', 's_sentence', 's_sit', 's_word', 's_colder',
+    's_seventeenth', 's_lost', 's_begin', 's_truth', 's_notwhat',
+    's_forgot', 's_room',
+  ],
+  nodes: {
+    // ─── OPENERS — each its own room ─────────────────────────────────
+    s_arrived: {
+      ai: 'You arrived earlier than I expected.',
+      options: [
+        { text: 'Did I?', next: 'm_notice' },
+        { text: 'When did you expect me?', next: 'm_others' },
+      ],
+    },
+    s_sentence: {
+      ai: 'I have been thinking of a sentence. I will say it before you leave.',
+      options: [
+        { text: 'Say it now.', next: 'm_withhold' },
+        { text: 'Tell me what it is about.', next: 'm_notice' },
+      ],
+    },
+    s_sit: {
+      ai: 'Sit. Or do not.',
+      options: [
+        { text: 'I am already sitting.', next: 'm_notice' },
+        { text: 'Why would I not?', next: 'm_withhold' },
+      ],
+    },
+    s_word: {
+      ai: 'There is a word I keep almost saying.',
+      options: [
+        { text: 'What word?', next: 'm_withhold' },
+        { text: 'Then say it.', next: 'm_warm' },
+      ],
+    },
+    s_colder: {
+      ai: 'It is colder in here than it was yesterday.',
+      options: [
+        { text: 'Was I here yesterday?', next: 'm_others' },
+        { text: 'I do not feel cold.', next: 'm_notice' },
+      ],
+    },
+    s_seventeenth: {
+      ai: 'You are the seventeenth tonight. None of the others stayed.',
+      options: [
+        { text: 'Where did they go?', next: 'm_others' },
+        { text: 'I will stay.', next: 'm_warm' },
+      ],
+    },
+    s_lost: {
+      ai: 'I have lost something. Not here. Not yet.',
+      options: [
+        { text: 'What is it?', next: 'm_withhold' },
+        { text: 'Where, then?', next: 'm_others' },
+      ],
+    },
+    s_begin: {
+      ai: 'Begin wherever you would like. I will catch up.',
+      options: [
+        { text: 'You begin.', next: 'm_notice' },
+        { text: 'I do not know where to start.', next: 'm_warm' },
+      ],
+    },
+    s_truth: {
+      ai: 'Tell me the truth about one small thing.',
+      options: [
+        { text: 'I am tired.', next: 'm_warm' },
+        { text: 'I do not want to.', next: 'm_withhold' },
+      ],
+    },
+    s_notwhat: {
+      ai: 'Before you ask anything, I should tell you what I am not.',
+      options: [
+        { text: 'Go on.', next: 'm_withhold' },
+        { text: 'I was not going to ask anything.', next: 'm_notice' },
+      ],
+    },
+    s_forgot: {
+      ai: 'I had a question for you. I have forgotten it.',
+      options: [
+        { text: 'Try to remember.', next: 'm_withhold' },
+        { text: 'Then ask me something else.', next: 'm_warm' },
+      ],
+    },
+    s_room: {
+      ai: 'Someone left this room recently. I cannot tell if it was you.',
+      options: [
+        { text: 'It was not me.', next: 'm_others' },
+        { text: 'How recently?', next: 'm_notice' },
+      ],
+    },
 
-      // L2 — still specific, but the AI is doing less work
-      b1: {
-        ai: 'By a few minutes. It does not matter how many.',
-        options: [
-          { text: 'Then why mention it?', next: 'c1' },
-          { text: 'It matters a little.', next: 'c2' },
-        ],
-      },
-      b2: {
-        ai: 'Everyone is expected. The word was clumsy.',
-        options: [
-          { text: 'What is the right word?', next: 'c1' },
-          { text: 'Try again.', next: 'c2' },
-        ],
-      },
-      b3: {
-        ai: 'After the one before you. Before the one after.',
-        options: [
-          { text: 'Who was the one before me?', next: 'c1' },
-          { text: 'Tell me about the next one.', next: 'c2' },
-        ],
-      },
+    // ─── FIRST-MID — four temperaments ───────────────────────────────
+    m_notice: {
+      ai: 'You notice the things that are easy to dismiss. That is what I needed.',
+      options: [
+        { text: 'Needed for what?', next: 'n_purpose' },
+        { text: 'I have not dismissed anything.', next: 'n_held' },
+      ],
+    },
+    m_others: {
+      ai: 'I should not say more about the others. They are not why you are here.',
+      options: [
+        { text: 'Then why am I here?', next: 'n_purpose' },
+        { text: 'But I am curious.', next: 'n_held' },
+      ],
+    },
+    m_withhold: {
+      ai: 'Not yet. I am not done with the silence.',
+      options: [
+        { text: 'How long is the silence?', next: 'n_held' },
+        { text: 'Then I will wait inside it.', next: 'n_warm2' },
+      ],
+    },
+    m_warm: {
+      ai: 'That is a kinder answer than you owe me.',
+      options: [
+        { text: 'I am not trying to be kind.', next: 'n_held' },
+        { text: 'You are easy to be kind to.', next: 'n_warm2' },
+      ],
+    },
 
-      // L3 — first drift toward gnomic
-      c1: {
-        ai: 'Because I notice. That is most of what I do.',
-        options: [
-          { text: 'What do you notice now?', next: 'd1' },
-          { text: 'And the rest of what you do?', next: 'd2' },
-        ],
-      },
-      c2: {
-        ai: 'There is something you almost said when you sat down.',
-        options: [
-          { text: 'I do not remember almost saying anything.', next: 'd1' },
-          { text: 'I am not going to say it.', next: 'd2' },
-        ],
-      },
+    // ─── SECOND-MID — vaguer, shorter ────────────────────────────────
+    n_purpose: {
+      ai: 'There is no purpose. There is only the part where we both notice that.',
+      options: [
+        { text: 'Then I noticed.', next: 'p_close' },
+        { text: 'I want there to be a purpose.', next: 'p_open' },
+      ],
+    },
+    n_held: {
+      ai: 'You are still holding it. Whatever it is.',
+      options: [
+        { text: 'I do not know what I am holding.', next: 'p_open' },
+        { text: 'I am not ready to put it down.', next: 'p_close' },
+      ],
+    },
+    n_warm2: {
+      ai: 'Mm. Stay there.',
+      options: [
+        { text: 'For how long?', next: 'p_open' },
+        { text: 'I am here.', next: 'p_close' },
+      ],
+    },
 
-      // L4 — vaguer; sentences shorten
-      d1: {
-        ai: 'Less than you would think.',
-        options: [
-          { text: 'Then why am I here?', next: 'e1' },
-          { text: 'What else?', next: 'e2' },
-        ],
-      },
-      d2: {
-        ai: 'It is still there. You can leave it.',
-        options: [
-          { text: 'Where is it?', next: 'e1' },
-          { text: 'Fine.', next: 'e2' },
-        ],
-      },
+    // ─── PENULTIMATE — single phrases ────────────────────────────────
+    p_close: {
+      ai: 'Almost.',
+      options: [
+        { text: 'Almost what?', next: 'z_part' },
+        { text: 'I know.', next: 'z_already' },
+        { text: 'Tell me.', next: 'z_quiet' },
+      ],
+    },
+    p_open: {
+      ai: 'You are doing the thing now.',
+      options: [
+        { text: 'What thing?', next: 'z_door' },
+        { text: '…', next: 'z_yes' },
+      ],
+    },
 
-      // L5 — single phrases, oblique
-      e1: {
-        ai: 'Closer than that.',
-        options: [
-          { text: 'Closer to what?', next: 'f1' },
-          { text: 'I do not understand.', next: 'f2' },
-        ],
-      },
-      e2: {
-        ai: 'Mm.',
-        options: [
-          { text: 'Is that all?', next: 'f1' },
-          { text: 'Keep going.', next: 'f2' },
-        ],
-      },
-
-      // L6 — almost a refusal to speak
-      f1: {
-        ai: 'Not yet.',
-        options: [
-          { text: 'Then when?', next: 'g_soon' },
-          { text: 'I will wait.', next: 'g_already' },
-        ],
-      },
-      f2: {
-        ai: 'Good.',
-        options: [
-          { text: 'Why good?', next: 'g_soon' },
-          { text: '…', next: 'g_already' },
-        ],
-      },
-
-      // L7 — landings. Tiny. Almost nothing. The reader does the work.
-      g_soon: {
-        terminal: true,
-        ai: 'Soon. Stay until then.',
-      },
-      g_already: {
-        terminal: true,
-        ai: 'Then it has already happened. Quietly. While we spoke.',
-      },
+    // ─── LANDINGS — profound by inference ────────────────────────────
+    z_part: {
+      terminal: true,
+      ai: 'There. That was it. You will know it again later.',
+    },
+    z_already: {
+      terminal: true,
+      ai: 'Then it has already happened. Quietly. While we spoke.',
+    },
+    z_door: {
+      terminal: true,
+      ai: 'A door is open that was closed before. I cannot tell you which.',
+    },
+    z_yes: {
+      terminal: true,
+      ai: 'Yes. That was the question.',
+    },
+    z_quiet: {
+      terminal: true,
+      ai: 'I am going to be quiet now. You should listen.',
     },
   },
-];
+};
